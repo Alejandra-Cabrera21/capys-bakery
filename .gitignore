@@ -1,0 +1,51 @@
+# Variables de entorno y secretos — NUNCA subir esto
+.env
+.env.local
+*.pem
+*.key
+appsettings.Development.json
+appsettings.*.Local.json
+
+# .NET / C# — carpetas de compilación
+bin/
+obj/
+**/bin/
+**/obj/
+
+# Visual Studio
+.vs/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio Code
+.vscode/
+
+# JetBrains Rider
+.idea/
+
+# NuGet
+*.nupkg
+packages/
+project.lock.json
+project.fragment.lock.json
+artifacts/
+
+# Publicación
+publish/
+*.publishsettings
+
+# Logs
+*.log
+
+# Sistema operativo
+.DS_Store
+Thumbs.db
+
+# Backups locales de SQL Server
+*.mdf
+*.ldf
+*.bak
+*.sqlite
+*.sqlite3
