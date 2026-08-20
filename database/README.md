@@ -11,7 +11,7 @@ Aquí se documentará:
 
 ## Cadena de conexión
 
-Cada integrante configura su propia cadena de conexión local en `appsettings.Development.json` (no se sube al repositorio, ver `.gitignore` en la raíz). Ejemplo de formato para SQL Server Express local:
+Cada uno tiene que configura su propia cadena de conexión local en `appsettings.Development.json` (no se sube al repositorio, veanlo en `.gitignore` en la raíz). Ejemplo de formato para SQL Server Express local:
 
 ```json
 "ConnectionStrings": {
@@ -19,4 +19,4 @@ Cada integrante configura su propia cadena de conexión local en `appsettings.De
 }
 ```
 
-La cadena de conexión de producción (MonsterASP.NET) se obtiene desde su panel de control y se configura como variable de entorno o en `appsettings.Production.json`, nunca en texto plano en el repositorio.
+La cadena de conexión de producción (MonsterASP.NET) se obtiene desde el panel de control de cada uno y se configura como variable de entorno o en `appsettings.Production.json`, nunca en texto plano en el repositorio.
