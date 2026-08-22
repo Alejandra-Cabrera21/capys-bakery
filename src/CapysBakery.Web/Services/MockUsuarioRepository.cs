@@ -10,7 +10,7 @@ namespace CapysBakery.Web.Services;
 //
 // Cuentas de prueba precargadas para poder probar los tres roles sin tener
 // que crear nada a mano:
-//   Dueño          -> dueño@capysbakery.com   / Dueño123!
+//   Dueño          -> dueno@capysbakery.com   / Dueño123!
 //   Administrador  -> vendedor@capysbakery.com / Vendedor123!
 //   Cliente        -> cliente@capysbakery.com  / Cliente123!
 public class MockUsuarioRepository : IUsuarioRepository
@@ -24,7 +24,7 @@ public class MockUsuarioRepository : IUsuarioRepository
         {
             new Usuario
             {
-                Id = 1, Nombre = "Capy (Dueño)", Correo = "dueño@capysbakery.com",
+                Id = 1, Nombre = "Capy (Dueño)", Correo = "dueno@capysbakery.com",
                 Telefono = "+502 5555 1234", Rol = RolUsuario.Dueño,
                 PasswordHash = HashPassword("Dueño123!"),
             },
@@ -32,7 +32,7 @@ public class MockUsuarioRepository : IUsuarioRepository
             {
                 Id = 2, Nombre = "Vendedor de prueba", Correo = "vendedor@capysbakery.com",
                 Telefono = "+502 5555 5678", Rol = RolUsuario.Administrador,
-                PasswordHash = HashPassword("Vendedor123!"), CreadaPorCorreo = "dueño@capysbakery.com",
+                PasswordHash = HashPassword("Vendedor123!"), CreadaPorCorreo = "dueno@capysbakery.com",
             },
             new Usuario
             {
