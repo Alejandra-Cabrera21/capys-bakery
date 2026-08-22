@@ -1,0 +1,61 @@
+@model List<CapysBakery.Web.Models.Producto>
+@{
+    ViewData["Title"] = "Gestión de productos";
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Gestión de productos</h1>
+    <p>Publica productos nuevos, edítalos o cambia su disponibilidad en el catálogo.</p>
+</div>
+
+<div class="cb-admin-layout">
+    @if (TempData["Mensaje"] is not null)
+    {
+        <div class="cb-form-success">@TempData["Mensaje"]</div>
+    }
+
+    <div class="cb-admin-toolbar">
+        <span class="cb-admin-sub">@Model.Count producto(s) en el catálogo</span>
+        <a asp-controller="AdminProductos" asp-action="Crear" class="btn cb-btn-plum">+ Publicar producto</a>
+    </div>
+
+    <table class="cb-admin-table">
+        <thead>
+            <tr>
+                <th>Producto</th>
+                <th>Categoría</th>
+                <th>Desde</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var producto in Model)
+            {
+                <tr>
+                    <td>
+                        <b>@producto.Nombre</b>
+                        @if (!string.IsNullOrEmpty(producto.CreadoPorCorreo))
+                        {
+                            <br>
+                            <span class="cb-admin-sub">Publicado por @producto.CreadoPorCorreo</span>
+                        }
+                    </td>
+                    <td>@producto.Categoria</td>
+                    <td>Q@producto.Precio.ToString("0.00")</td>
+                    <td>
+                        <span class="cb-estado-pill @(producto.Disponible ? "cb-estado-disponible" : "cb-estado-oculto")">
+                            @(producto.Disponible ? "Visible" : "Oculto")
+                        </span>
+                    </td>
+                    <td style="text-align:right; white-space:nowrap;">
+                        <a asp-controller="AdminProductos" asp-action="Editar" asp-route-id="@producto.Id" class="cb-admin-link">Editar</a>
+                        <form asp-controller="AdminProductos" asp-action="CambiarDisponibilidad" asp-route-id="@producto.Id" method="post" style="display:inline;">
+                            <button type="submit" class="cb-admin-link cb-admin-link-btn">@(producto.Disponible ? "Ocultar" : "Mostrar")</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
