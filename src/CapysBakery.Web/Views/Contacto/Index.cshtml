@@ -1,0 +1,68 @@
+@{
+    ViewData["Title"] = "Contacto";
+    bool enviado = ViewBag.Enviado ?? false;
+}
+
+<div class="cb-catalog-hero" style="text-align:center;">
+    <span class="eyebrow">hablemos</span>
+    <h1>Contáctanos</h1>
+    <p style="max-width:480px; margin:0 auto;">¿Tienes una pregunta, un pedido especial o quieres cotizar un evento? Escríbenos.</p>
+</div>
+
+<div class="cb-contact-layout">
+    <div class="cb-contact-form-col">
+        @if (enviado)
+        {
+            <div class="cb-wa-note" style="margin-bottom:20px;">
+                <p><b>¡Mensaje enviado!</b>Te responderemos lo antes posible.</p>
+            </div>
+        }
+        <form method="post" asp-controller="Contacto" asp-action="Index">
+            <div class="cb-cf-row-2">
+                <div class="cb-cf-line"><label for="nombre">Nombre completo</label><input type="text" id="nombre" name="nombre" class="cb-form-input" placeholder="Tu nombre" required /></div>
+                <div class="cb-cf-line"><label for="correo">Correo electrónico</label><input type="email" id="correo" name="correo" class="cb-form-input" placeholder="tucorreo@ejemplo.com" required /></div>
+            </div>
+            <div class="cb-cf-row-2">
+                <div class="cb-cf-line"><label for="telefono">Teléfono</label><input type="tel" id="telefono" name="telefono" class="cb-form-input" placeholder="+502 0000 0000" /></div>
+                <div class="cb-cf-line">
+                    <label for="tipo">Tipo de consulta</label>
+                    <select id="tipo" name="tipo" class="cb-form-input">
+                        <option>Pedido especial</option>
+                        <option>Cotización de evento</option>
+                        <option>Otro</option>
+                    </select>
+                </div>
+            </div>
+            <div class="cb-cf-line">
+                <label for="mensaje">Mensaje</label>
+                <textarea id="mensaje" name="mensaje" class="cb-form-input cb-textarea" placeholder="Cuéntanos en qué te podemos ayudar..." required></textarea>
+            </div>
+            <button type="submit" class="btn cb-btn-plum" style="padding:14px 32px;">Enviar mensaje</button>
+        </form>
+    </div>
+
+    <div class="cb-contact-info-col">
+        <div class="cb-info-item">
+            <div class="cb-info-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#7C2B3B" stroke-width="1.8"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.3 1.8.6 2.7a2 2 0 0 1-.5 2.1L8 9.7a16 16 0 0 0 6 6l1.2-1.2a2 2 0 0 1 2.1-.5c.9.3 1.8.5 2.7.6a2 2 0 0 1 1.7 2.1Z"/></svg></div>
+            <div><h5>Teléfono / WhatsApp</h5><p>+502 5555 1234<br />Lun a sáb, 8am – 6pm</p></div>
+        </div>
+        <div class="cb-info-item">
+            <div class="cb-info-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#7C2B3B" stroke-width="1.8"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="m3 7 9 6 9-6"/></svg></div>
+            <div><h5>Correo electrónico</h5><p>hola@capysbakery.com</p></div>
+        </div>
+        <div class="cb-info-item">
+            <div class="cb-info-icon"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="#7C2B3B" stroke-width="1.8"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            <div>
+                <h5>Ubicación</h5>
+                <p>Zona 14, Ciudad de Guatemala</p>
+                <div class="cb-map-box"><svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="#C9982E" stroke-width="1.5"><path d="M21 10c0 6-9 12-9 12s-9-6-9-12a9 9 0 0 1 18 0Z"/><circle cx="12" cy="10" r="3"/></svg></div>
+            </div>
+        </div>
+        <div style="margin-top:24px;">
+            <h5 style="font-size:13px; margin-bottom:10px;">Horario de atención</h5>
+            <div class="cb-hours-row"><span>Lunes – Viernes</span><span>8:00am – 6:00pm</span></div>
+            <div class="cb-hours-row"><span>Sábados</span><span>9:00am – 2:00pm</span></div>
+            <div class="cb-hours-row" style="border-bottom:none;"><span>Domingos</span><span>Cerrado</span></div>
+        </div>
+    </div>
+</div>
