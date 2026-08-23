@@ -38,21 +38,34 @@
                 {
                     @if (User.IsInRole("Administrador") || User.IsInRole("Dueño"))
                     {
-                        <a asp-controller="AdminProductos" asp-action="Index" class="@(currentController == "AdminProductos" ? "active" : "")">Productos</a>
-                        <a asp-controller="Admin" asp-action="Pedidos" class="@(currentController == "Admin" ? "active" : "")">Pedidos</a>
+                        <div class="cb-nav-dropdown">
+                            <button type="button" class="cb-nav-dropdown-trigger">Panel ▾</button>
+                            <div class="cb-nav-dropdown-panel">
+                                <a asp-controller="AdminProductos" asp-action="Index" class="@(currentController == "AdminProductos" ? "active" : "")">Productos</a>
+                                <a asp-controller="Admin" asp-action="Pedidos" class="@(currentController == "Admin" ? "active" : "")">Pedidos</a>
+                                @if (User.IsInRole("Dueño"))
+                                {
+                                    <a asp-controller="AdminUsuarios" asp-action="Index" class="@(currentController == "AdminUsuarios" ? "active" : "")">Cuentas</a>
+                                }
+                            </div>
+                        </div>
                     }
-                    @if (User.IsInRole("Dueño"))
-                    {
-                        <a asp-controller="AdminUsuarios" asp-action="Index" class="@(currentController == "AdminUsuarios" ? "active" : "")">Cuentas</a>
-                    }
-                    <a asp-controller="Cuenta" asp-action="MisPedidos" class="@(currentController == "Cuenta" && currentAction == "MisPedidos" ? "active" : "")">Mis pedidos</a>
-                    <form asp-controller="Cuenta" asp-action="Logout" method="post" class="cb-mobile-only-form">
-                        <button type="submit" class="cb-nav-logout-link">Cerrar sesión</button>
-                    </form>
+
+                    <div class="cb-nav-dropdown">
+                        <button type="button" class="cb-nav-dropdown-trigger">Mi cuenta ▾</button>
+                        <div class="cb-nav-dropdown-panel">
+                            <span class="cb-nav-dropdown-label">Hola, @User.Identity!.Name</span>
+                            <a asp-controller="Cuenta" asp-action="MisPedidos" class="@(currentController == "Cuenta" && currentAction == "MisPedidos" ? "active" : "")">Mis pedidos</a>
+                            <a asp-controller="Cuenta" asp-action="MisFavoritos" class="@(currentController == "Cuenta" && currentAction == "MisFavoritos" ? "active" : "")">Mis favoritos</a>
+                            <form asp-controller="Cuenta" asp-action="Logout" method="post" class="cb-nav-mobile-only">
+                                <button type="submit" class="cb-nav-dropdown-logout">Cerrar sesión</button>
+                            </form>
+                        </div>
+                    </div>
                 }
                 else
                 {
-                    <a asp-controller="Cuenta" asp-action="Login">Iniciar sesión</a>
+                    <a asp-controller="Cuenta" asp-action="Login" class="cb-nav-mobile-only">Iniciar sesión</a>
                 }
             </nav>
 
@@ -64,7 +77,6 @@
                 <a asp-controller="Catalogo" asp-action="Index" class="btn cb-btn-plum cb-desktop-only">Pedir ahora</a>
                 @if (User.Identity?.IsAuthenticated ?? false)
                 {
-                    <span class="cb-desktop-only cb-admin-sub" style="align-self:center;">Hola, @User.Identity!.Name</span>
                     <form asp-controller="Cuenta" asp-action="Logout" method="post" class="cb-desktop-only" style="display:inline;">
                         <button type="submit" class="btn cb-btn-outline">Cerrar sesión</button>
                     </form>

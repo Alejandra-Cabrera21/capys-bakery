@@ -1,0 +1,46 @@
+@model List<Producto>
+@{
+    ViewData["Title"] = "Mis favoritos";
+
+    // Se arma explícitamente el objeto a serializar (en vez de mandar el
+    // Producto tal cual) para no depender de si la app está configurada en
+    // PascalCase o camelCase — así mis-favoritos.js siempre recibe estos
+    // nombres de propiedad exactos, sin importar la configuración global.
+    var productosParaJs = Model.Select(p => new
+    {
+        id = p.Id,
+        nombre = p.Nombre,
+        categoria = p.Categoria,
+        precio = p.Precio,
+        imagenUrl = p.ImagenUrl,
+    });
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Mis favoritos</h1>
+    <p>Los productos que marcaste con ♥ desde su página de detalle.</p>
+</div>
+
+<div class="cb-catalog-layout">
+    <div class="cb-catalog-grid-wrap">
+        <div class="cb-grid-3" id="cb-favoritos-lista"><!-- llenado por mis-favoritos.js --></div>
+
+        <div id="cb-favoritos-vacio" class="cb-cart-empty" style="display:none;">
+            <p>Todavía no tienes productos favoritos.</p>
+            <a asp-controller="Catalogo" asp-action="Index" class="btn cb-btn-plum">Ir al catálogo</a>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Catálogo completo (solo productos visibles). mis-favoritos.js lo
+        // filtra contra la lista de ids guardada en localStorage
+        // ("capys_favoritos", ver configurador.js) para armar las tarjetas.
+        window.CAPYS_PRODUCTOS = @Html.Raw(Json.Serialize(productosParaJs));
+    </script>
+    <script src="~/js/mis-favoritos.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => CapysMisFavoritos.renderizar());
+    </script>
+}

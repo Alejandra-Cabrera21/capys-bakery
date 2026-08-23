@@ -10,7 +10,7 @@
     <div class="cb-pd-info">
         <div class="cb-product-tag">@Model.Categoria personalizado</div>
         <h1>@Model.Nombre</h1>
-        <div class="cb-pd-price" id="cb-pd-precio-mostrado">Q@Model.Presentaciones.First().Precio.ToString("0.00")</div>
+        <div class="cb-pd-price" id="cb-pd-precio-mostrado">Q@(Model.Presentaciones.First().Precio.ToString("0.00"))</div>
         <p class="cb-pd-desc">@Model.Descripcion</p>
 
         <form id="form-agregar-carrito" data-producto-id="@Model.Id" data-producto-nombre="@Model.Nombre">
@@ -24,7 +24,7 @@
                                 data-valor="@p.Nombre" data-precio="@p.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">
                             <span class="cb-size-name">@p.Nombre</span>
                             <span class="cb-size-porciones">@p.Porciones porcion@(p.Porciones == 1 ? "" : "es")</span>
-                            <span class="cb-size-precio">Q@p.Precio.ToString("0.00")</span>
+                            <span class="cb-size-precio">Q@(p.Precio.ToString("0.00"))</span>
                         </button>
                     }
                 </div>
@@ -76,7 +76,7 @@
             </div>
 
             <div class="cb-pd-btns">
-                <button type="button" class="btn cb-btn-outline">Agregar a favoritos</button>
+                <button type="button" class="btn cb-btn-outline" id="btn-agregar-favoritos" data-producto-id="@Model.Id">♡ Agregar a favoritos</button>
                 <button type="submit" class="btn cb-btn-plum" id="btn-agregar-carrito">Agregar al carrito</button>
             </div>
         </form>

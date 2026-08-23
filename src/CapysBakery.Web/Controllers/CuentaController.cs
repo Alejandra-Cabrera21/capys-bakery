@@ -15,10 +15,12 @@ namespace CapysBakery.Web.Controllers;
 public class CuentaController : Controller
 {
     private readonly IUsuarioRepository _usuarioRepository;
+    private readonly IProductoRepository _productoRepository;
 
-    public CuentaController(IUsuarioRepository usuarioRepository)
+    public CuentaController(IUsuarioRepository usuarioRepository, IProductoRepository productoRepository)
     {
         _usuarioRepository = usuarioRepository;
+        _productoRepository = productoRepository;
     }
 
     // GET /Cuenta/Login
@@ -120,6 +122,19 @@ public class CuentaController : Controller
         ViewBag.CorreoUsuario = User.FindFirstValue(ClaimTypes.Email);
         ViewBag.NombreUsuario = User.Identity?.Name;
         return View();
+    }
+
+    // GET /Cuenta/MisFavoritos — productos que el comprador marcó con el
+    // corazón desde la página de detalle (ver configurador.js). Igual que
+    // los favoritos se guardan solo como una lista de ids en localStorage
+    // (no en BD todavía), esta vista le pasa a mis-favoritos.js el catálogo
+    // completo para que arme las tarjetas (nombre, precio, imagen) de los
+    // productos que coincidan con esos ids.
+    [Authorize]
+    public IActionResult MisFavoritos()
+    {
+        var productos = _productoRepository.ObtenerTodos();
+        return View(productos);
     }
 
     private async Task IniciarSesionAsync(int id, string nombre, string correo, string rol)

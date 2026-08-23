@@ -69,6 +69,12 @@ a {
     background: transparent;
 }
 
+.cb-btn-favorito-activo {
+    border-color: var(--plum);
+    color: var(--plum);
+    background: var(--blush);
+}
+
 /* ---------- nav ---------- */
 .cb-nav {
     background: var(--white);
@@ -109,7 +115,8 @@ a {
 
 .cb-nav-links {
     display: flex;
-    gap: 34px;
+    align-items: center;
+    gap: 28px;
     font-size: 14px;
     font-weight: 500;
     color: var(--ink-soft);
@@ -124,6 +131,13 @@ a {
     display: flex;
     align-items: center;
     gap: 18px;
+}
+
+/* visible solo en el menú mobile (contrario a .cb-desktop-only); se usa
+   para no repetir el mismo botón (Iniciar sesión / Cerrar sesión) al mismo
+   tiempo en el menú de arriba Y junto a "Pedir ahora". */
+@media (min-width: 992px) {
+    .cb-nav-mobile-only { display: none !important; }
 }
 
 .cb-icon-badge {
@@ -343,6 +357,13 @@ a {
     font-size: 16px;
 }
 
+.cb-favoritos-acciones {
+    display: flex;
+    gap: 10px;
+    margin-top: 14px;
+}
+.cb-favoritos-acciones .btn { flex: 1; padding: 9px 10px; font-size: 12.5px; }
+
 .cb-add-btn {
     width: 34px;
     height: 34px;
@@ -548,10 +569,22 @@ a {
 
 /* ---------- responsivo ---------- */
 @media (max-width: 991px) {
-    .cb-nav-inner, .cb-hero, .cb-section, .cb-story, .cb-testi-row, .cb-footer-grid {
+    .cb-hero, .cb-section, .cb-story, .cb-testi-row, .cb-footer-grid {
         flex-direction: column;
         padding-left: 24px;
         padding-right: 24px;
+    }
+
+    /* el header SÍ se queda en fila: logo a la izquierda, carrito +
+       hamburguesa a la derecha (no se apilan verticalmente). */
+    .cb-nav-inner {
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        padding-top: 16px;
+        padding-bottom: 16px;
+        padding-left: 20px;
+        padding-right: 20px;
     }
 
     .cb-nav-links {
@@ -782,17 +815,23 @@ a {
         right: 0;
         background: var(--white);
         flex-direction: column;
+        align-items: stretch;   /* pisa el align-items:center del desktop */
+        text-align: left;
         gap: 0;
         padding: 8px 24px 16px 24px;
         border-bottom: 1px solid #EEE1CC;
         box-shadow: 0 12px 24px rgba(50, 30, 10, 0.08);
         z-index: 40;
+        max-height: 80vh;
+        overflow-y: auto;
     }
     .cb-nav-links.cb-open { display: flex; }
-    .cb-nav-links a { padding: 13px 0; border-bottom: 1px solid #F1E8D8; font-size: 15px; }
+    .cb-nav-links a { padding: 13px 0; border-bottom: 1px solid #F1E8D8; font-size: 15px; text-align: left; }
     .cb-nav-links a:last-child { border-bottom: none; }
 
-    .cb-nav-inner { position: relative; padding: 16px 20px; }
+    .cb-nav-dropdown { width: 100%; }
+
+    .cb-nav-inner { position: relative; }
 
     /* bottom nav fijo, solo en mobile */
     .cb-bottom-nav {
@@ -922,12 +961,64 @@ a {
 }
 .cb-pedido-card-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
 
-/* ---------- sesión: saludo + cerrar sesión en el nav ---------- */
-.cb-nav-logout-link {
-    background: none; border: none; padding: 0; font: inherit; text-align: left;
-    color: var(--ink); font-size: 15px; cursor: pointer; width: 100%;
+/* ---------- menú "Panel" / "Mi cuenta" (dropdown en el nav) ---------- */
+.cb-nav-dropdown { position: relative; }
+
+.cb-nav-dropdown-trigger {
+    background: none; border: none; padding: 0; font: inherit;
+    font-size: 14px; font-weight: 500; color: var(--ink-soft); cursor: pointer;
 }
-.cb-mobile-only-form { display: none; }
-@media (max-width: 900px) {
-    .cb-mobile-only-form { display: block; }
+.cb-nav-dropdown.cb-open .cb-nav-dropdown-trigger,
+.cb-nav-dropdown-trigger:hover { color: var(--plum); }
+
+.cb-nav-dropdown-panel {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 16px;
+    min-width: 190px;
+    background: var(--white);
+    border: 1px solid #EEE1CC;
+    border-radius: 10px;
+    box-shadow: 0 14px 28px rgba(50, 30, 10, 0.12);
+    padding: 8px;
+    z-index: 50;
+}
+.cb-nav-dropdown.cb-open .cb-nav-dropdown-panel { display: block; }
+
+.cb-nav-dropdown-panel a,
+.cb-nav-dropdown-panel .cb-nav-dropdown-logout {
+    display: block; width: 100%; text-align: left;
+    padding: 9px 10px; border-radius: 6px;
+    font-size: 13px; color: var(--ink); background: none; border: none; font: inherit; cursor: pointer;
+}
+.cb-nav-dropdown-panel a:hover,
+.cb-nav-dropdown-panel .cb-nav-dropdown-logout:hover { background: var(--cream-2); }
+.cb-nav-dropdown-panel a.active { color: var(--plum); font-weight: 600; }
+.cb-nav-dropdown-panel .cb-nav-dropdown-logout { color: var(--plum); font-weight: 600; margin-top: 4px; border-top: 1px solid #F1E8D8; padding-top: 12px; border-radius: 0; }
+
+.cb-nav-dropdown-label {
+    display: block; padding: 6px 10px 10px 10px; margin-bottom: 4px;
+    font-size: 10.5px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    color: var(--ink-soft); border-bottom: 1px solid #F1E8D8;
+}
+
+@media (max-width: 991px) {
+    /* en mobile el menú ya es una lista vertical desplegable; el dropdown
+       se aplana ahí mismo en vez de flotar encima del contenido. */
+    .cb-nav-dropdown-trigger {
+        display: block; width: 100%; text-align: left;
+        pointer-events: none; padding: 13px 0 2px 0; border-bottom: 1px solid #F1E8D8;
+        color: var(--ink); font-weight: 600;
+    }
+    .cb-nav-dropdown-panel {
+        display: block !important; position: static; box-shadow: none; border: none;
+        margin: 0; padding: 4px 0 8px 10px; text-align: left;
+    }
+    .cb-nav-dropdown-panel a,
+    .cb-nav-dropdown-panel .cb-nav-dropdown-logout {
+        text-align: left; padding: 11px 0; border-bottom: 1px solid #F1E8D8; font-size: 14px;
+    }
+    .cb-nav-dropdown-label { text-align: left; border-bottom: none; padding: 4px 0; }
 }

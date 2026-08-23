@@ -8,6 +8,34 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const precioMostrado = document.getElementById("cb-pd-precio-mostrado");
     const botonAgregar = document.getElementById("btn-agregar-carrito");
+    const botonFavoritos = document.getElementById("btn-agregar-favoritos");
+
+    // --- favoritos ---
+    // Igual que el carrito, se guarda en localStorage mientras no exista una
+    // cuenta/BD real que persista favoritos entre dispositivos (ver TODOs de
+    // checkout.js). Es solo una lista de ids de producto.
+    const CLAVE_FAVORITOS = "capys_favoritos";
+
+    function obtenerFavoritos() {
+        return JSON.parse(localStorage.getItem(CLAVE_FAVORITOS) || "[]");
+    }
+
+    function actualizarBotonFavoritos() {
+        if (!botonFavoritos) return;
+        const esFavorito = obtenerFavoritos().includes(botonFavoritos.dataset.productoId);
+        botonFavoritos.textContent = esFavorito ? "♥ En favoritos" : "♡ Agregar a favoritos";
+        botonFavoritos.classList.toggle("cb-btn-favorito-activo", esFavorito);
+    }
+
+    botonFavoritos?.addEventListener("click", () => {
+        const id = botonFavoritos.dataset.productoId;
+        let favoritos = obtenerFavoritos();
+        favoritos = favoritos.includes(id) ? favoritos.filter(f => f !== id) : [...favoritos, id];
+        localStorage.setItem(CLAVE_FAVORITOS, JSON.stringify(favoritos));
+        actualizarBotonFavoritos();
+    });
+
+    actualizarBotonFavoritos();
 
     function precioSeleccionado() {
         const activo = form.querySelector('[data-config="tamano"] .active');

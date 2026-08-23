@@ -42,7 +42,7 @@
                         }
                     </td>
                     <td>@producto.Categoria</td>
-                    <td>Q@producto.Precio.ToString("0.00")</td>
+                    <td>Q@(producto.Precio.ToString("0.00"))</td>
                     <td>
                         <span class="cb-estado-pill @(producto.Disponible ? "cb-estado-disponible" : "cb-estado-oculto")">
                             @(producto.Disponible ? "Visible" : "Oculto")

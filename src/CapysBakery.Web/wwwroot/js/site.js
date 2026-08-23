@@ -28,3 +28,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 });
+
+// Dropdowns del nav ("Panel", "Mi cuenta"): clic para abrir/cerrar. En
+// mobile no hacen nada (ver CSS: ahí quedan siempre expandidos como lista
+// plana dentro del menú hamburguesa).
+document.addEventListener("DOMContentLoaded", () => {
+    const dropdowns = document.querySelectorAll(".cb-nav-dropdown");
+    if (!dropdowns.length) return;
+
+    dropdowns.forEach(dropdown => {
+        const trigger = dropdown.querySelector(".cb-nav-dropdown-trigger");
+        trigger?.addEventListener("click", () => {
+            const yaAbierto = dropdown.classList.contains("cb-open");
+            dropdowns.forEach(d => d.classList.remove("cb-open"));
+            if (!yaAbierto) dropdown.classList.add("cb-open");
+        });
+    });
+
+    document.addEventListener("click", (e) => {
+        dropdowns.forEach(dropdown => {
+            if (!dropdown.contains(e.target)) dropdown.classList.remove("cb-open");
+        });
+    });
+});
