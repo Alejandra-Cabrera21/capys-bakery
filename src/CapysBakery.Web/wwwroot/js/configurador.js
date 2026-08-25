@@ -95,6 +95,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const item = {
             id: form.dataset.productoId,
+            presentacionId: tamanoBtn?.dataset.presentacionId ? parseInt(tamanoBtn.dataset.presentacionId, 10) : null,
             nombre: form.dataset.productoNombre,
             precio: precio,
             cantidad: parseInt(qtyValue.textContent, 10),

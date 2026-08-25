@@ -4,10 +4,18 @@
     var fondo = Model.ImagenUrl is not null
         ? $"background-image:url('{Model.ImagenUrl}'); background-size:cover; background-position:center;"
         : "background:linear-gradient(135deg,#E8C99B,#C9982E);";
+    var nombreAutor = ViewBag.NombreAutor as string;
+    var comentarios = ViewBag.Comentarios as List<ComentarioPublicacion> ?? new();
 }
 
 <div class="cb-catalog-hero">
-    <span class="eyebrow">@Model.Categoria · @Model.FechaPublicacion.ToString("d MMMM yyyy")</span>
+    <span class="eyebrow">
+        @Model.Categoria · @Model.FechaPublicacion.ToString("d MMMM yyyy")
+        @if (!string.IsNullOrEmpty(nombreAutor))
+        {
+            <text> · Publicado por @nombreAutor</text>
+        }
+    </span>
     <h1>@Model.Titulo</h1>
 </div>
 
@@ -20,4 +28,50 @@
     }
 
     <a asp-controller="Blog" asp-action="Index" class="cb-admin-link">← Volver al blog</a>
+
+    <hr style="margin:32px 0; border:none; border-top:1px solid #EEE1CC;" />
+
+    <h3 style="font-size:20px; margin-bottom:18px;">Comentarios (@comentarios.Count)</h3>
+
+    @if (User.Identity?.IsAuthenticated ?? false)
+    {
+        <form asp-controller="Blog" asp-action="Comentar" method="post" style="margin-bottom:28px;">
+            <input type="hidden" name="publicacionId" value="@Model.Id" />
+            <textarea name="contenido" class="cb-form-input cb-textarea" placeholder="Escribe un comentario..." required style="min-height:80px;"></textarea>
+            <button type="submit" class="btn cb-btn-plum" style="margin-top:10px;">Comentar</button>
+        </form>
+    }
+    else
+    {
+        <p class="cb-admin-sub" style="margin-bottom:28px;">
+            <a asp-controller="Cuenta" asp-action="Login" asp-route-returnUrl="@Url.Action("Detalle", "Blog", new { id = Model.Id })">Inicia sesión</a> para dejar un comentario.
+        </p>
+    }
+
+    @if (comentarios.Count == 0)
+    {
+        <p class="cb-admin-sub">Todavía no hay comentarios — sé el primero en escribir uno.</p>
+    }
+    else
+    {
+        @foreach (var comentario in comentarios)
+        {
+            <div class="cb-pedido-card" style="margin-bottom:12px;">
+                <div class="cb-pedido-card-top">
+                    <b style="font-size:13px;">@(comentario.Usuario?.Nombre ?? "Usuario")</b>
+                    <span class="cb-admin-sub">@comentario.FechaCreacion.ToString("d MMM yyyy, HH:mm")</span>
+                </div>
+                <p style="font-size:13.5px; color:var(--ink); margin-top:6px;">@comentario.Contenido</p>
+
+                @if (User.IsInRole("Administrador") || User.IsInRole("Dueño"))
+                {
+                    <form asp-controller="Blog" asp-action="EliminarComentario" method="post" style="margin-top:6px;">
+                        <input type="hidden" name="comentarioId" value="@comentario.Id" />
+                        <input type="hidden" name="publicacionId" value="@Model.Id" />
+                        <button type="submit" class="cb-admin-link-btn">Eliminar</button>
+                    </form>
+                }
+            </div>
+        }
+    }
 </div>

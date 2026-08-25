@@ -45,11 +45,16 @@ public class AdminProductosController : Controller
     }
 
     // POST /AdminProductos/Crear
+    // categoriaTexto y alergenosTexto llegan como texto simple desde el
+    // formulario (el formulario no cambió de UX); aquí se traducen a las
+    // relaciones reales (Categorias, Alergenos) vía
+    // IProductoRepository.ObtenerOCrear*, igual que ya se hacía antes para
+    // categorías "al vuelo".
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Crear(Producto producto, IFormFile? imagen, string? alergenosTexto)
+    public async Task<IActionResult> Crear(Producto producto, IFormFile? imagen, string? categoriaTexto, string? alergenosTexto)
     {
-        if (string.IsNullOrWhiteSpace(producto.Nombre) || string.IsNullOrWhiteSpace(producto.Categoria))
+        if (string.IsNullOrWhiteSpace(producto.Nombre) || string.IsNullOrWhiteSpace(categoriaTexto))
         {
             ModelState.AddModelError(string.Empty, "Nombre y categoría son obligatorios.");
             ViewBag.Categorias = _productoRepository.ObtenerCategorias();
@@ -68,12 +73,14 @@ public class AdminProductosController : Controller
         // El "precio desde" mostrado en catálogo/inicio es el de la
         // presentación más económica, igual que documenta el diseño de BD.
         producto.Precio = producto.Presentaciones.Min(p => p.Precio);
-        producto.Alergenos = DividirAlergenos(alergenosTexto);
+        producto.Categorias = new() { _productoRepository.ObtenerOCrearCategoria(categoriaTexto) };
+        producto.Alergenos = _productoRepository.ObtenerOCrearAlergenos(DividirTexto(alergenosTexto));
         producto.CreadoPorCorreo = User.Identity?.Name;
 
         if (imagen is not null && imagen.Length > 0)
         {
-            producto.ImagenUrl = await GuardarImagenAsync(imagen);
+            var url = await GuardarImagenAsync(imagen);
+            producto.Imagenes.Add(new ImagenProducto { UrlImagen = url, Orden = 1, EsPrincipal = true });
         }
 
         _productoRepository.Agregar(producto);
@@ -95,7 +102,7 @@ public class AdminProductosController : Controller
     // POST /AdminProductos/Editar/3
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Editar(int id, Producto producto, IFormFile? imagen, string? alergenosTexto)
+    public async Task<IActionResult> Editar(int id, Producto producto, IFormFile? imagen, string? categoriaTexto, string? alergenosTexto)
     {
         producto.Id = id;
 
@@ -108,11 +115,16 @@ public class AdminProductosController : Controller
         }
 
         producto.Precio = producto.Presentaciones.Min(p => p.Precio);
-        producto.Alergenos = DividirAlergenos(alergenosTexto);
+        if (!string.IsNullOrWhiteSpace(categoriaTexto))
+        {
+            producto.Categorias = new() { _productoRepository.ObtenerOCrearCategoria(categoriaTexto) };
+        }
+        producto.Alergenos = _productoRepository.ObtenerOCrearAlergenos(DividirTexto(alergenosTexto));
 
         if (imagen is not null && imagen.Length > 0)
         {
-            producto.ImagenUrl = await GuardarImagenAsync(imagen);
+            var url = await GuardarImagenAsync(imagen);
+            producto.Imagenes.Add(new ImagenProducto { UrlImagen = url, Orden = 1, EsPrincipal = true });
         }
 
         var actualizado = _productoRepository.Actualizar(producto);
@@ -136,7 +148,7 @@ public class AdminProductosController : Controller
         return RedirectToAction(nameof(Index));
     }
 
-    private List<string> DividirAlergenos(string? texto) =>
+    private List<string> DividirTexto(string? texto) =>
         (texto ?? string.Empty)
             .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
             .ToList();
@@ -154,10 +166,10 @@ public class AdminProductosController : Controller
         await imagen.CopyToAsync(flujo);
 
         // TODO (BD real / almacenamiento en la nube): esto guarda el
-        // archivo en el disco del servidor y su ruta relativa en
-        // Producto.ImagenUrl, tal como documenta imagen_producto.url_imagen
-        // en el diseño de base de datos. Si el hosting no persiste disco
-        // (ej. algunos PaaS), esto debe migrar a un proveedor de storage.
+        // archivo en el disco del servidor y su ruta relativa queda en una
+        // fila de imagen_producto, tal como documenta el diseño de BD. Si
+        // el hosting no persiste disco (ej. algunos PaaS), esto debe migrar
+        // a un proveedor de storage.
         return $"/{CarpetaImagenes}/{nombreArchivo}";
     }
 }

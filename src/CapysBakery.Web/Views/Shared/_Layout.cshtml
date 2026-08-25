@@ -56,6 +56,7 @@
                         <button type="button" class="cb-nav-dropdown-trigger">Mi cuenta ▾</button>
                         <div class="cb-nav-dropdown-panel">
                             <span class="cb-nav-dropdown-label">Hola, @User.Identity!.Name</span>
+                            <a asp-controller="Cuenta" asp-action="MiPerfil" class="@(currentController == "Cuenta" && currentAction == "MiPerfil" ? "active" : "")">Mi perfil</a>
                             <a asp-controller="Cuenta" asp-action="MisPedidos" class="@(currentController == "Cuenta" && currentAction == "MisPedidos" ? "active" : "")">Mis pedidos</a>
                             <a asp-controller="Cuenta" asp-action="MisFavoritos" class="@(currentController == "Cuenta" && currentAction == "MisFavoritos" ? "active" : "")">Mis favoritos</a>
                             <form asp-controller="Cuenta" asp-action="Logout" method="post" class="cb-nav-mobile-only">

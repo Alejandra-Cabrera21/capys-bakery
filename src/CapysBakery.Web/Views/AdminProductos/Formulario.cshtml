@@ -31,8 +31,8 @@
 
         <div class="cb-cf-row-2" style="display:flex; gap:16px;">
             <div class="cb-cf-line">
-                <label for="Categoria">Categoría</label>
-                <input type="text" id="Categoria" name="Categoria" class="cb-form-input" value="@Model.Categoria" list="lista-categorias" placeholder="Ej. Pie" required />
+                <label for="categoriaTexto">Categoría</label>
+                <input type="text" id="categoriaTexto" name="categoriaTexto" class="cb-form-input" value="@Model.CategoriaPrincipal" list="lista-categorias" placeholder="Ej. Pie" required />
                 <datalist id="lista-categorias">
                     @foreach (var categoria in categorias)
                     {
@@ -42,7 +42,7 @@
             </div>
             <div class="cb-cf-line">
                 <label for="alergenosTexto">Alérgenos <span class="opt">(separados por coma)</span></label>
-                <input type="text" id="alergenosTexto" name="alergenosTexto" class="cb-form-input" value="@string.Join(", ", Model.Alergenos)" placeholder="Gluten, Lácteos, Huevo" />
+                <input type="text" id="alergenosTexto" name="alergenosTexto" class="cb-form-input" value="@string.Join(", ", Model.Alergenos.Select(a => a.Nombre))" placeholder="Gluten, Lácteos, Huevo" />
             </div>
         </div>
 

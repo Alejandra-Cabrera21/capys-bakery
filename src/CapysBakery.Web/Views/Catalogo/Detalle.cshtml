@@ -8,7 +8,7 @@
         <div class="cb-pd-main-img"><svg width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="#7C2B3B" stroke-width="1"><ellipse cx="12" cy="9" rx="7" ry="5"/><path d="M5 9v6a7 3 0 0 0 14 0V9"/></svg></div>
     </div>
     <div class="cb-pd-info">
-        <div class="cb-product-tag">@Model.Categoria personalizado</div>
+        <div class="cb-product-tag">@Model.CategoriaPrincipal personalizado</div>
         <h1>@Model.Nombre</h1>
         <div class="cb-pd-price" id="cb-pd-precio-mostrado">Q@(Model.Presentaciones.First().Precio.ToString("0.00"))</div>
         <p class="cb-pd-desc">@Model.Descripcion</p>
@@ -21,7 +21,7 @@
                     {
                         var p = Model.Presentaciones[i];
                         <button type="button" class="cb-size-option @(i == 0 ? "active" : "")"
-                                data-valor="@p.Nombre" data-precio="@p.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                                data-valor="@p.Nombre" data-precio="@p.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-presentacion-id="@p.Id">
                             <span class="cb-size-name">@p.Nombre</span>
                             <span class="cb-size-porciones">@p.Porciones porcion@(p.Porciones == 1 ? "" : "es")</span>
                             <span class="cb-size-precio">Q@(p.Precio.ToString("0.00"))</span>
@@ -30,7 +30,7 @@
                 </div>
             </div>
 
-            @if (Model.Categoria == "Pastel")
+            @if (Model.CategoriaPrincipal == "Pastel" || Model.CategoriaPrincipal == "Pasteles")
             {
                 <div class="cb-config-block">
                     <h4>Color de decoración</h4>
@@ -60,7 +60,7 @@
                     <div class="cb-allergen-row">
                         @foreach (var alergeno in Model.Alergenos)
                         {
-                            <span class="cb-allergen-chip">⚠ @alergeno</span>
+                            <span class="cb-allergen-chip">⚠ @alergeno.Nombre</span>
                         }
                     </div>
                 </div>

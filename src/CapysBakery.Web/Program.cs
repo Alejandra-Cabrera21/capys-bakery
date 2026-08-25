@@ -1,25 +1,32 @@
+using CapysBakery.Web.Data;
 using CapysBakery.Web.Services;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Registra los servicios de MVC (Controllers + Views)
 builder.Services.AddControllersWithViews();
 
-// Fuente de datos de productos. Hoy es la versión "mock" (datos fijos en
-// memoria) porque la base de datos aún no existe. El día que se conecte
-// SQL Server, se cambia SOLO esta línea por la implementación real con
-// Entity Framework (ej. builder.Services.AddScoped<IProductoRepository, EfProductoRepository>())
-// y ningún Controller ni View se modifica.
-builder.Services.AddSingleton<IProductoRepository, MockProductoRepository>();
+// Conexión real a SQL Server (Fase 5).
+builder.Services.AddDbContext<CapysBakeryDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Fuente de datos de usuarios/roles. Misma idea: mock en memoria hoy,
-// EfUsuarioRepository + ASP.NET Core Identity real cuando exista SQL Server.
-builder.Services.AddSingleton<IUsuarioRepository, MockUsuarioRepository>();
-
-// Fuente de datos del blog. Misma idea: mock en memoria hoy, EfPublicacionRepository
-// cuando exista SQL Server.
-builder.Services.AddSingleton<IPublicacionRepository, MockPublicacionRepository>();
+// FASE 6: a partir de aquí, la app YA lee y escribe de verdad en
+// CapysBakeryDb — se reemplazó cada Mock...Repository (datos fijos en
+// memoria) por su versión Ef...Repository (Entity Framework Core sobre el
+// DbContext de arriba). Ningún Controller ni View tuvo que cambiar para
+// esto, que era justo el punto de programar contra las interfaces desde
+// el principio.
+//
+// AddScoped (no AddSingleton): el DbContext es "scoped" por convención de
+// ASP.NET Core (una instancia por solicitud HTTP), así que los
+// repositorios que lo usan deben tener el mismo ciclo de vida.
+builder.Services.AddScoped<IProductoRepository, EfProductoRepository>();
+builder.Services.AddScoped<IUsuarioRepository, EfUsuarioRepository>();
+builder.Services.AddScoped<IPublicacionRepository, EfPublicacionRepository>();
+builder.Services.AddScoped<IEntregaPagoRepository, EfEntregaPagoRepository>();
+builder.Services.AddScoped<IPedidoRepository, EfPedidoRepository>();
 
 // Autenticación por cookie: permite tener sesión y roles (Cliente,
 // Administrador, Dueño) ya funcionando desde ahora, sin depender de que

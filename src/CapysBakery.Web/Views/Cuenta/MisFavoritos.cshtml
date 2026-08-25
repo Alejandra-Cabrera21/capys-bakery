@@ -10,9 +10,10 @@
     {
         id = p.Id,
         nombre = p.Nombre,
-        categoria = p.Categoria,
+        categoria = p.CategoriaPrincipal,
         precio = p.Precio,
         imagenUrl = p.ImagenUrl,
+        presentacionId = p.Presentaciones.OrderBy(x => x.Precio).Select(x => x.Id).FirstOrDefault(),
     });
 }
 

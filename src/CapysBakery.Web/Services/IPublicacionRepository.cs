@@ -18,4 +18,10 @@ public interface IPublicacionRepository
 
     Publicacion Agregar(Publicacion publicacion);
     bool Actualizar(Publicacion publicacion);
+
+    // Comentarios: cualquier usuario con sesión iniciada puede comentar en
+    // una entrada publicada; Administrador/Dueño pueden moderar (borrar).
+    List<ComentarioPublicacion> ObtenerComentarios(int publicacionId);
+    ComentarioPublicacion AgregarComentario(int publicacionId, int usuarioId, string contenido);
+    bool EliminarComentario(int comentarioId);
 }

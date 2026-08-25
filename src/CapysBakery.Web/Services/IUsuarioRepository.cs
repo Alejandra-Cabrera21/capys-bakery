@@ -22,4 +22,14 @@ public interface IUsuarioRepository
 
     // Devuelve el usuario si la contraseña es correcta; null en caso contrario.
     Usuario? ValidarCredenciales(string correo, string password);
+
+    // "Olvidé mi contraseña": mientras no exista un servicio de correo para
+    // mandar un link de recuperación, se verifica identidad con correo +
+    // teléfono (ambos ya guardados en la cuenta) y se permite poner una
+    // contraseña nueva directamente.
+    bool RestablecerPassword(string correo, string telefono, string passwordNueva);
+
+    // Cambiar contraseña desde "Mi perfil", ya con sesión iniciada — pide
+    // la contraseña actual para confirmar identidad antes de cambiarla.
+    bool CambiarPassword(int usuarioId, string passwordActual, string passwordNueva);
 }

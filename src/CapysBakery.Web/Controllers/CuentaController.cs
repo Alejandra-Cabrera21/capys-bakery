@@ -16,11 +16,13 @@ public class CuentaController : Controller
 {
     private readonly IUsuarioRepository _usuarioRepository;
     private readonly IProductoRepository _productoRepository;
+    private readonly IPedidoRepository _pedidoRepository;
 
-    public CuentaController(IUsuarioRepository usuarioRepository, IProductoRepository productoRepository)
+    public CuentaController(IUsuarioRepository usuarioRepository, IProductoRepository productoRepository, IPedidoRepository pedidoRepository)
     {
         _usuarioRepository = usuarioRepository;
         _productoRepository = productoRepository;
+        _pedidoRepository = pedidoRepository;
     }
 
     // GET /Cuenta/Login
@@ -109,19 +111,86 @@ public class CuentaController : Controller
         return RedirectToAction("Index", "Home");
     }
 
-    // GET /Cuenta/MisPedidos — historial del comprador (rol Cliente y
-    // también accesible para Administrador/Dueño sobre su propia cuenta).
-    // Nota: mientras los pedidos se guarden en localStorage (ver
-    // checkout.js) esta vista solo puede filtrar los pedidos hechos desde
-    // ESTE navegador; el historial completo entre dispositivos requiere la
-    // tabla pedido en SQL Server, ya documentada en el diseño de base de
-    // datos (id_pedido, id_usuario en consideraciones futuras).
+    // GET /Cuenta/RecuperarPassword — "olvidé mi contraseña". Mientras no
+    // exista un servicio de correo para mandar un link real, se verifica
+    // identidad con correo + teléfono (ambos ya guardados en la cuenta).
+    public IActionResult RecuperarPassword()
+    {
+        if (User.Identity?.IsAuthenticated ?? false)
+        {
+            return RedirectToAction("Index", "Home");
+        }
+        return View();
+    }
+
+    // POST /Cuenta/RecuperarPassword
+    [HttpPost]
+    [ValidateAntiForgeryToken]
+    public IActionResult RecuperarPassword(string correo, string telefono, string passwordNueva, string confirmarPassword)
+    {
+        if (passwordNueva != confirmarPassword)
+        {
+            ViewBag.Error = "Las contraseñas no coinciden.";
+            return View();
+        }
+
+        var listo = _usuarioRepository.RestablecerPassword(correo, telefono, passwordNueva);
+        if (!listo)
+        {
+            ViewBag.Error = "No encontramos una cuenta con ese correo y teléfono. Verifica los datos e intenta de nuevo.";
+            return View();
+        }
+
+        TempData["Mensaje"] = "Tu contraseña se actualizó. Ya puedes iniciar sesión con la nueva.";
+        return RedirectToAction(nameof(Login));
+    }
+
+    // GET /Cuenta/MiPerfil
+    [Authorize]
+    public IActionResult MiPerfil()
+    {
+        var usuario = _usuarioRepository.ObtenerPorCorreo(User.FindFirstValue(ClaimTypes.Email)!);
+        if (usuario is null) return NotFound();
+        return View(usuario);
+    }
+
+    // POST /Cuenta/CambiarPassword — desde "Mi perfil", ya con sesión.
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public IActionResult CambiarPassword(string passwordActual, string passwordNueva, string confirmarPassword)
+    {
+        var usuario = _usuarioRepository.ObtenerPorCorreo(User.FindFirstValue(ClaimTypes.Email)!);
+        if (usuario is null) return NotFound();
+
+        if (passwordNueva != confirmarPassword)
+        {
+            ViewBag.Error = "Las contraseñas nuevas no coinciden.";
+            return View("MiPerfil", usuario);
+        }
+
+        var listo = _usuarioRepository.CambiarPassword(usuario.Id, passwordActual, passwordNueva);
+        if (!listo)
+        {
+            ViewBag.Error = "La contraseña actual no es correcta.";
+            return View("MiPerfil", usuario);
+        }
+
+        ViewBag.Mensaje = "Tu contraseña se actualizó correctamente.";
+        return View("MiPerfil", usuario);
+    }
+
+    // GET /Cuenta/MisPedidos — historial del comprador.
+    // Fase 6: ya lee de verdad de la base de datos, filtrado por el
+    // id_usuario real de la cuenta con sesión iniciada (antes filtraba por
+    // un correo guardado en localStorage, y solo veía lo hecho en ESE
+    // navegador).
     [Authorize]
     public IActionResult MisPedidos()
     {
-        ViewBag.CorreoUsuario = User.FindFirstValue(ClaimTypes.Email);
-        ViewBag.NombreUsuario = User.Identity?.Name;
-        return View();
+        var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var pedidos = _pedidoRepository.ObtenerPorUsuario(usuarioId);
+        return View(pedidos);
     }
 
     // GET /Cuenta/MisFavoritos — productos que el comprador marcó con el
