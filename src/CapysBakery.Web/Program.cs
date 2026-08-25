@@ -17,6 +17,10 @@ builder.Services.AddSingleton<IProductoRepository, MockProductoRepository>();
 // EfUsuarioRepository + ASP.NET Core Identity real cuando exista SQL Server.
 builder.Services.AddSingleton<IUsuarioRepository, MockUsuarioRepository>();
 
+// Fuente de datos del blog. Misma idea: mock en memoria hoy, EfPublicacionRepository
+// cuando exista SQL Server.
+builder.Services.AddSingleton<IPublicacionRepository, MockPublicacionRepository>();
+
 // Autenticación por cookie: permite tener sesión y roles (Cliente,
 // Administrador, Dueño) ya funcionando desde ahora, sin depender de que
 // exista la base de datos. Cuando se conecte ASP.NET Core Identity, este

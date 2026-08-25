@@ -1,10 +1,29 @@
+using CapysBakery.Web.Services;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CapysBakery.Web.Controllers;
 
-// TODO (futuro): cuando exista la base de datos, esto pasa a tener una
-// tabla de Publicaciones real en vez de contenido fijo en la vista.
 public class BlogController : Controller
 {
-    public IActionResult Index() => View();
+    private readonly IPublicacionRepository _publicacionRepository;
+
+    public BlogController(IPublicacionRepository publicacionRepository)
+    {
+        _publicacionRepository = publicacionRepository;
+    }
+
+    // GET /Blog
+    public IActionResult Index()
+    {
+        var publicaciones = _publicacionRepository.ObtenerPublicadas();
+        return View(publicaciones);
+    }
+
+    // GET /Blog/Detalle/3
+    public IActionResult Detalle(int id)
+    {
+        var publicacion = _publicacionRepository.ObtenerPorId(id);
+        if (publicacion is null || !publicacion.Publicada) return NotFound();
+        return View(publicacion);
+    }
 }

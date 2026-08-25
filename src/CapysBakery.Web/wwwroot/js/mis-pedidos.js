@@ -14,6 +14,18 @@ const CapysMisPedidos = (() => {
         return todos.filter(p => (p.correoCliente || "").toLowerCase() === correo.toLowerCase());
     }
 
+    // "Pedir de nuevo": toma los mismos productos (con la misma cantidad y
+    // precio que tenían en ese pedido) y los agrega al carrito ACTUAL, sin
+    // vaciar lo que ya hubiera en él. El precio se conserva tal como se
+    // guardó en el pedido (no se vuelve a consultar el catálogo), igual que
+    // ya se documentó para pedido_detalle en el diseño de base de datos:
+    // el precio histórico de la compra no debe cambiar aunque el catálogo
+    // cambie después.
+    function pedirDeNuevo(pedido) {
+        pedido.productos.forEach(item => CapysCarrito.agregarProducto({ ...item }));
+        window.location.href = "/Carrito";
+    }
+
     function renderizar(correo) {
         const pedidos = obtenerMisPedidos(correo);
         const contenedor = document.getElementById("cb-mis-pedidos-lista");
@@ -28,7 +40,7 @@ const CapysMisPedidos = (() => {
         if (vacio) vacio.style.display = "none";
         contenedor.style.display = "block";
 
-        contenedor.innerHTML = pedidos.map(pedido => {
+        contenedor.innerHTML = pedidos.map((pedido, indice) => {
             const productos = pedido.productos.map(p => `${p.cantidad}× ${p.nombre}`).join(", ");
             return `
                 <div class="cb-pedido-card">
@@ -39,9 +51,14 @@ const CapysMisPedidos = (() => {
                     <p class="cb-admin-sub">${productos}</p>
                     <div class="cb-summary-row"><span>${pedido.formaEntrega}</span><span>${pedido.modalidadPago}</span></div>
                     <div class="cb-summary-row total"><span>Total</span><span>Q${pedido.total.toFixed(2)}</span></div>
+                    <button type="button" class="btn cb-btn-outline cb-pedir-de-nuevo" data-indice="${indice}" style="width:100%; margin-top:12px;">↻ Pedir de nuevo</button>
                 </div>
             `;
         }).join("");
+
+        contenedor.querySelectorAll(".cb-pedir-de-nuevo").forEach(boton => {
+            boton.addEventListener("click", () => pedirDeNuevo(pedidos[Number(boton.dataset.indice)]));
+        });
     }
 
     return { renderizar };

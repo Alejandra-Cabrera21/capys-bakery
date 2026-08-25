@@ -1,0 +1,23 @@
+@model Publicacion
+@{
+    ViewData["Title"] = Model.Titulo;
+    var fondo = Model.ImagenUrl is not null
+        ? $"background-image:url('{Model.ImagenUrl}'); background-size:cover; background-position:center;"
+        : "background:linear-gradient(135deg,#E8C99B,#C9982E);";
+}
+
+<div class="cb-catalog-hero">
+    <span class="eyebrow">@Model.Categoria · @Model.FechaPublicacion.ToString("d MMMM yyyy")</span>
+    <h1>@Model.Titulo</h1>
+</div>
+
+<div class="cb-section" style="padding-top:10px; max-width:760px; margin:0 auto;">
+    <div class="cb-blog-featured-img" style="@fondo height:320px; border-radius:14px; margin-bottom:28px;"></div>
+
+    @foreach (var parrafo in Model.Contenido.Split("\n\n", StringSplitOptions.RemoveEmptyEntries))
+    {
+        <p style="font-size:14.5px; color:var(--ink); line-height:1.8; margin-bottom:18px;">@parrafo</p>
+    }
+
+    <a asp-controller="Blog" asp-action="Index" class="cb-admin-link">← Volver al blog</a>
+</div>

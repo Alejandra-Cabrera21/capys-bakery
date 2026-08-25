@@ -1,0 +1,73 @@
+@model Publicacion
+@{
+    ViewData["Title"] = (bool)(ViewBag.EsEdicion ?? false) ? "Editar publicación" : "Nueva publicación";
+    var accion = (bool)(ViewBag.EsEdicion ?? false) ? "Editar" : "Crear";
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">@ViewData["Title"]</h1>
+    <p>Los cambios se reflejan de inmediato en el blog público (a menos que quede marcada como oculta).</p>
+</div>
+
+<div class="cb-admin-layout" style="max-width:760px;">
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="cb-form-error">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@error.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    <form method="post" enctype="multipart/form-data"
+          asp-controller="AdminBlog" asp-action="@accion" asp-route-id="@Model.Id">
+
+        <div class="cb-cf-line">
+            <label for="Titulo">Título</label>
+            <input type="text" id="Titulo" name="Titulo" class="cb-form-input" value="@Model.Titulo" placeholder="Ej. Cómo hacemos nuestro merengue perfecto" required />
+        </div>
+
+        <div class="cb-cf-line">
+            <label for="Categoria">Categoría</label>
+            <input type="text" id="Categoria" name="Categoria" class="cb-form-input" value="@Model.Categoria" list="lista-categorias-blog" placeholder="Ej. Recetas" />
+            <datalist id="lista-categorias-blog">
+                <option value="Recetas"></option>
+                <option value="Detrás de cámaras"></option>
+                <option value="Tips"></option>
+            </datalist>
+        </div>
+
+        <div class="cb-cf-line">
+            <label for="Resumen">Resumen <span class="opt">(se muestra en la tarjeta del listado)</span></label>
+            <input type="text" id="Resumen" name="Resumen" class="cb-form-input" value="@Model.Resumen" placeholder="Una o dos líneas que resuman la publicación" />
+        </div>
+
+        <div class="cb-cf-line">
+            <label for="Contenido">Contenido</label>
+            <textarea id="Contenido" name="Contenido" class="cb-form-input cb-textarea" style="min-height:220px;" placeholder="Escribe el cuerpo completo de la publicación. Deja una línea en blanco entre párrafos.">@Model.Contenido</textarea>
+        </div>
+
+        <div class="cb-cf-line">
+            <label for="imagen">Imagen de portada</label>
+            <input type="file" id="imagen" name="imagen" class="cb-form-input" accept="image/*" />
+            @if (!string.IsNullOrEmpty(Model.ImagenUrl))
+            {
+                <div style="margin-top:10px;">
+                    <img src="@Model.ImagenUrl" alt="Imagen actual" style="max-width:140px; border-radius:10px; border:1px solid #EEE1CC;" />
+                    <p class="cb-admin-sub">Imagen actual — sube un archivo nuevo solo si quieres reemplazarla.</p>
+                </div>
+            }
+        </div>
+
+        <div class="cb-cf-line" style="margin: 4px 0 20px 0;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px;">
+                <input type="checkbox" name="Publicada" value="true" checked="@Model.Publicada" /> Visible en el blog público
+            </label>
+        </div>
+
+        <button type="submit" class="btn cb-btn-plum" style="width:100%;">
+            @((bool)(ViewBag.EsEdicion ?? false) ? "Guardar cambios" : "Publicar entrada")
+        </button>
+    </form>
+</div>

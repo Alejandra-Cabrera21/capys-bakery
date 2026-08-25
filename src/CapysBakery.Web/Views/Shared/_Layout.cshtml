@@ -43,6 +43,7 @@
                             <div class="cb-nav-dropdown-panel">
                                 <a asp-controller="AdminProductos" asp-action="Index" class="@(currentController == "AdminProductos" ? "active" : "")">Productos</a>
                                 <a asp-controller="Admin" asp-action="Pedidos" class="@(currentController == "Admin" ? "active" : "")">Pedidos</a>
+                                <a asp-controller="AdminBlog" asp-action="Index" class="@(currentController == "AdminBlog" ? "active" : "")">Blog</a>
                                 @if (User.IsInRole("Dueño"))
                                 {
                                     <a asp-controller="AdminUsuarios" asp-action="Index" class="@(currentController == "AdminUsuarios" ? "active" : "")">Cuentas</a>
