@@ -1,0 +1,67 @@
+@model List<Publicacion>
+@{
+    ViewData["Title"] = "Blog";
+    var destacada = Model.FirstOrDefault();
+    var resto = Model.Skip(1).ToList();
+}
+
+<div class="cb-catalog-hero">
+    <span class="eyebrow">recetas, tips y detrás de cámaras</span>
+    <h1>El diario de Capys</h1>
+    <p>Nuestro proceso, recetas para intentar en casa y todo lo que aprendemos horneando cada semana.</p>
+</div>
+
+<div class="cb-section" style="padding-top:10px;">
+    @if (destacada is not null)
+    {
+        var fondoDestacada = destacada.ImagenUrl is not null
+            ? $"background-image:url('{destacada.ImagenUrl}'); background-size:cover; background-position:center;"
+            : "background:linear-gradient(135deg,#E8C99B,#C9982E);";
+
+        <div class="cb-blog-featured">
+            <div class="cb-blog-featured-img" style="@fondoDestacada"></div>
+            <div class="cb-blog-featured-copy">
+                <div class="cb-blog-date">Destacado · @destacada.FechaPublicacion.ToString("d MMM")</div>
+                <h2 style="font-size:26px; margin-bottom:12px;">@destacada.Titulo</h2>
+                <p style="font-size:13.5px; color:var(--ink-soft); line-height:1.7; margin-bottom:18px;">@destacada.Resumen</p>
+                <a asp-controller="Blog" asp-action="Detalle" asp-route-id="@destacada.Id" class="btn cb-btn-outline" style="display:inline-block; width:fit-content;">Leer receta completa</a>
+            </div>
+        </div>
+    }
+
+    @if (resto.Any())
+    {
+        <div class="cb-blog-grid">
+            @foreach (var publicacion in resto)
+            {
+                var fondo = publicacion.ImagenUrl is not null
+                    ? $"background-image:url('{publicacion.ImagenUrl}'); background-size:cover; background-position:center;"
+                    : "background:linear-gradient(135deg,#D9B48F,#A87A1E);";
+
+                <a asp-controller="Blog" asp-action="Detalle" asp-route-id="@publicacion.Id" class="cb-blog-card" style="text-decoration:none; color:inherit;">
+                    <div class="cb-blog-card-img" style="@fondo"></div>
+                    <div class="cb-blog-card-body">
+                        <div class="cb-blog-date">@publicacion.Categoria · @publicacion.FechaPublicacion.ToString("d MMM")</div>
+                        <h4>@publicacion.Titulo</h4>
+                        <p>@publicacion.Resumen</p>
+                    </div>
+                </a>
+            }
+        </div>
+    }
+    else if (destacada is null)
+    {
+        <p class="cb-admin-sub" style="text-align:center; padding:40px 0;">Todavía no hay publicaciones en el blog.</p>
+    }
+</div>
+
+<div class="cb-newsletter">
+    <div>
+        <h3>Recetas nuevas cada semana</h3>
+        <p>Súmate y recibe nuestras publicaciones directo a tu correo.</p>
+    </div>
+    <form class="cb-newsletter-form" method="post" action="#">
+        <input type="email" name="correo" placeholder="Tu correo electrónico" required />
+        <button type="submit" class="btn cb-btn-plum">Suscribirme</button>
+    </form>
+</div>

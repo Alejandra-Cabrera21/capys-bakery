@@ -1,0 +1,28 @@
+@{
+    ViewData["Title"] = "Mis pedidos";
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Mis pedidos</h1>
+    <p>Consulta el estado de tus pedidos anteriores, @ViewBag.NombreUsuario.</p>
+</div>
+
+<div class="cb-admin-banner">
+    ⚠️ <b>Modo de prueba:</b> mientras no exista base de datos, aquí solo se muestran los pedidos hechos desde <b>este mismo navegador</b> con tu cuenta. El historial entre distintos dispositivos requiere la base de datos conectada.
+</div>
+
+<div class="cb-admin-layout" style="max-width:700px;">
+    <div id="cb-mis-pedidos-lista"><!-- llenado por mis-pedidos.js --></div>
+
+    <div id="cb-mis-pedidos-vacio" class="cb-cart-empty" style="display:none;">
+        <p>Todavía no tienes pedidos registrados.</p>
+        <a asp-controller="Catalogo" asp-action="Index" class="btn cb-btn-plum">Ir al catálogo</a>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/mis-pedidos.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => CapysMisPedidos.renderizar(@Html.Raw(Json.Serialize(ViewBag.CorreoUsuario))));
+    </script>
+}

@@ -1,0 +1,55 @@
+@model List<CapysBakery.Web.Models.Usuario>
+@{
+    ViewData["Title"] = "Cuentas del equipo";
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Cuentas del equipo</h1>
+    <p>Solo el Dueño puede crear cuentas de vendedor u otro dueño. Los compradores se registran ellos mismos desde el sitio.</p>
+</div>
+
+<div class="cb-admin-layout">
+    @if (TempData["Mensaje"] is not null)
+    {
+        <div class="cb-form-success">@TempData["Mensaje"]</div>
+    }
+
+    <div class="cb-admin-toolbar">
+        <span class="cb-admin-sub">@Model.Count cuenta(s) registradas</span>
+        <a asp-controller="AdminUsuarios" asp-action="Crear" class="btn cb-btn-plum">+ Crear cuenta</a>
+    </div>
+
+    <table class="cb-admin-table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Rol</th>
+                <th>Creada por</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var usuario in Model)
+            {
+                var claseRol = usuario.Rol switch
+                {
+                    CapysBakery.Web.Models.RolUsuario.Dueño => "cb-rol-dueno",
+                    CapysBakery.Web.Models.RolUsuario.Administrador => "cb-rol-vendedor",
+                    _ => "cb-rol-cliente"
+                };
+                var etiquetaRol = usuario.Rol switch
+                {
+                    CapysBakery.Web.Models.RolUsuario.Dueño => "Dueño",
+                    CapysBakery.Web.Models.RolUsuario.Administrador => "Vendedor",
+                    _ => "Cliente"
+                };
+                <tr>
+                    <td>@usuario.Nombre</td>
+                    <td>@usuario.Correo</td>
+                    <td><span class="cb-estado-pill @claseRol">@etiquetaRol</span></td>
+                    <td>@(usuario.CreadaPorCorreo ?? "—")</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

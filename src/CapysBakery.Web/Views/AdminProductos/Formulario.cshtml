@@ -1,0 +1,109 @@
+@model CapysBakery.Web.Models.Producto
+@{
+    ViewData["Title"] = (bool)(ViewBag.EsEdicion ?? false) ? "Editar producto" : "Publicar producto";
+    var categorias = ViewBag.Categorias as List<CapysBakery.Web.Models.Categoria> ?? new();
+    var accion = (bool)(ViewBag.EsEdicion ?? false) ? "Editar" : "Crear";
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">@ViewData["Title"]</h1>
+    <p>Los cambios se reflejan de inmediato en el catálogo público (a menos que quede marcado como oculto).</p>
+</div>
+
+<div class="cb-admin-layout" style="max-width:760px;">
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="cb-form-error">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@error.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    <form method="post" enctype="multipart/form-data"
+          asp-controller="AdminProductos" asp-action="@accion" asp-route-id="@Model.Id">
+
+        <div class="cb-cf-line">
+            <label for="Nombre">Nombre del producto</label>
+            <input type="text" id="Nombre" name="Nombre" class="cb-form-input" value="@Model.Nombre" placeholder="Ej. Pie de Limón" required />
+        </div>
+
+        <div class="cb-cf-row-2" style="display:flex; gap:16px;">
+            <div class="cb-cf-line">
+                <label for="Categoria">Categoría</label>
+                <input type="text" id="Categoria" name="Categoria" class="cb-form-input" value="@Model.Categoria" list="lista-categorias" placeholder="Ej. Pie" required />
+                <datalist id="lista-categorias">
+                    @foreach (var categoria in categorias)
+                    {
+                        <option value="@categoria.Nombre"></option>
+                    }
+                </datalist>
+            </div>
+            <div class="cb-cf-line">
+                <label for="alergenosTexto">Alérgenos <span class="opt">(separados por coma)</span></label>
+                <input type="text" id="alergenosTexto" name="alergenosTexto" class="cb-form-input" value="@string.Join(", ", Model.Alergenos)" placeholder="Gluten, Lácteos, Huevo" />
+            </div>
+        </div>
+
+        <div class="cb-cf-line">
+            <label for="Descripcion">Descripción</label>
+            <textarea id="Descripcion" name="Descripcion" class="cb-form-input cb-textarea" placeholder="Descripción comercial que verá el cliente">@Model.Descripcion</textarea>
+        </div>
+
+        <div class="cb-cf-line">
+            <label for="imagen">Imagen del producto</label>
+            <input type="file" id="imagen" name="imagen" class="cb-form-input" accept="image/*" />
+            @if (!string.IsNullOrEmpty(Model.ImagenUrl))
+            {
+                <div style="margin-top:10px;">
+                    <img src="@Model.ImagenUrl" alt="Imagen actual" style="max-width:140px; border-radius:10px; border:1px solid #EEE1CC;" />
+                    <p class="cb-admin-sub">Imagen actual — sube un archivo nuevo solo si quieres reemplazarla.</p>
+                </div>
+            }
+        </div>
+
+        <div class="cb-cf-line">
+            <label>Presentaciones y precios</label>
+            <div id="cb-presentaciones-lista">
+                @for (var i = 0; i < Model.Presentaciones.Count; i++)
+                {
+                    <div class="cb-presentacion-row">
+                        <input type="text" name="Presentaciones[@i].Nombre" class="cb-form-input" placeholder="Ej. Mediano (8 porciones)" value="@Model.Presentaciones[i].Nombre" required />
+                        <input type="number" name="Presentaciones[@i].Porciones" class="cb-form-input" placeholder="Porciones" min="1" value="@Model.Presentaciones[i].Porciones" />
+                        <input type="number" step="0.01" name="Presentaciones[@i].Precio" class="cb-form-input" placeholder="Precio Q" min="0" value="@Model.Presentaciones[i].Precio" required />
+                        <button type="button" class="cb-admin-link-btn cb-quitar-presentacion" aria-label="Quitar presentación">✕</button>
+                    </div>
+                }
+                @if (Model.Presentaciones.Count == 0)
+                {
+                    <div class="cb-presentacion-row">
+                        <input type="text" name="Presentaciones[0].Nombre" class="cb-form-input" placeholder="Ej. Individual" required />
+                        <input type="number" name="Presentaciones[0].Porciones" class="cb-form-input" placeholder="Porciones" min="1" />
+                        <input type="number" step="0.01" name="Presentaciones[0].Precio" class="cb-form-input" placeholder="Precio Q" min="0" required />
+                        <button type="button" class="cb-admin-link-btn cb-quitar-presentacion" aria-label="Quitar presentación">✕</button>
+                    </div>
+                }
+            </div>
+            <button type="button" id="cb-agregar-presentacion" class="btn cb-btn-outline" style="margin-top:8px;">+ Agregar presentación</button>
+            <p class="cb-hint-text">El precio "desde" que se muestra en catálogo es siempre el de la presentación más económica.</p>
+        </div>
+
+        <div class="cb-cf-row-2" style="display:flex; gap:24px; align-items:center; margin: 20px 0;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px;">
+                <input type="checkbox" name="Disponible" value="true" checked="@Model.Disponible" /> Visible en el catálogo
+            </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px;">
+                <input type="checkbox" name="EsPromocion" value="true" checked="@Model.EsPromocion" /> Marcar como promoción
+            </label>
+        </div>
+
+        <button type="submit" class="btn cb-btn-plum" style="width:100%;">
+            @((bool)(ViewBag.EsEdicion ?? false) ? "Guardar cambios" : "Publicar producto")
+        </button>
+    </form>
+</div>
+
+@section Scripts {
+    <script src="~/js/admin-productos.js" asp-append-version="true"></script>
+}
