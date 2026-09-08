@@ -31,18 +31,22 @@
 
         <div class="cb-cf-row-2" style="display:flex; gap:16px;">
             <div class="cb-cf-line">
-                <label for="Categoria">Categoría</label>
-                <input type="text" id="Categoria" name="Categoria" class="cb-form-input" value="@Model.Categoria" list="lista-categorias" placeholder="Ej. Pie" required />
-                <datalist id="lista-categorias">
+                <label for="categoriaTexto">Categoría</label>
+                <select id="categoriaTexto" name="categoriaTexto" class="cb-form-input" required>
+                    <option value="">Selecciona una categoría...</option>
                     @foreach (var categoria in categorias)
                     {
-                        <option value="@categoria.Nombre"></option>
+                        <option value="@categoria.Nombre" selected="@(categoria.Nombre == Model.CategoriaPrincipal)">@categoria.Nombre</option>
                     }
-                </datalist>
+                </select>
+                <p class="cb-hint-text" style="margin-top:6px;">
+                    ¿No está la categoría que buscas?
+                    <a asp-controller="AdminCategorias" asp-action="Crear" class="cb-admin-link">Crea una nueva</a> y vuelve aquí.
+                </p>
             </div>
             <div class="cb-cf-line">
                 <label for="alergenosTexto">Alérgenos <span class="opt">(separados por coma)</span></label>
-                <input type="text" id="alergenosTexto" name="alergenosTexto" class="cb-form-input" value="@string.Join(", ", Model.Alergenos)" placeholder="Gluten, Lácteos, Huevo" />
+                <input type="text" id="alergenosTexto" name="alergenosTexto" class="cb-form-input" value="@string.Join(", ", Model.Alergenos.Select(a => a.Nombre))" placeholder="Gluten, Lácteos, Huevo" />
             </div>
         </div>
 
@@ -52,13 +56,28 @@
         </div>
 
         <div class="cb-cf-line">
-            <label for="imagen">Imagen del producto</label>
-            <input type="file" id="imagen" name="imagen" class="cb-form-input" accept="image/*" />
+            <label for="imagen">Imagen principal <span class="opt">(obligatoria)</span></label>
+            <input type="file" id="imagen" name="imagen" class="cb-form-input" accept="image/*" required="@(!(bool)(ViewBag.EsEdicion ?? false))" />
             @if (!string.IsNullOrEmpty(Model.ImagenUrl))
             {
                 <div style="margin-top:10px;">
                     <img src="@Model.ImagenUrl" alt="Imagen actual" style="max-width:140px; border-radius:10px; border:1px solid #EEE1CC;" />
                     <p class="cb-admin-sub">Imagen actual — sube un archivo nuevo solo si quieres reemplazarla.</p>
+                </div>
+            }
+        </div>
+
+        <div class="cb-cf-line">
+            <label for="imagenSecundaria">Segunda imagen <span class="opt">(opcional)</span></label>
+            <input type="file" id="imagenSecundaria" name="imagenSecundaria" class="cb-form-input" accept="image/*" />
+            @{
+                var imagenSecundariaActual = Model.Imagenes.FirstOrDefault(i => !i.EsPrincipal)?.UrlImagen;
+            }
+            @if (!string.IsNullOrEmpty(imagenSecundariaActual))
+            {
+                <div style="margin-top:10px;">
+                    <img src="@imagenSecundariaActual" alt="Segunda imagen actual" style="max-width:140px; border-radius:10px; border:1px solid #EEE1CC;" />
+                    <p class="cb-admin-sub">Segunda imagen actual — sube un archivo nuevo solo si quieres reemplazarla.</p>
                 </div>
             }
         </div>

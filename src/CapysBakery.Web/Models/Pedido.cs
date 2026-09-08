@@ -1,27 +1,53 @@
 namespace CapysBakery.Web.Models;
 
-// Representa la estructura de un pedido tal como la definió el cliente
-// en el "Análisis funcional del flujo de realización del pedido".
-// IMPORTANTE: mientras no exista base de datos, los pedidos NO se guardan
-// aquí en el servidor — viven en localStorage del navegador del cliente
-// (ver wwwroot/js/checkout.js). Esta clase documenta la forma que van a
-// tener cuando se creen las tablas reales con Entity Framework Core.
+// Coincide con pedido — antes era un borrador plano que nunca se guardaba
+// en ningún lado (checkout.js solo lo escribía en localStorage). Ahora
+// tiene relaciones reales y sí se persiste (ver IPedidoRepository y el
+// endpoint nuevo Checkout/Confirmar, Fase 4).
 public class Pedido
 {
-    public string Identificador { get; set; } = string.Empty; // Ej. "CB-1042"
+    public int Id { get; set; }
+    public string CodigoPedido { get; set; } = string.Empty; // Ej. "CB-00125"
     public string NombreCliente { get; set; } = string.Empty;
-    public string Telefono { get; set; } = string.Empty;
-    public string FechaEntrega { get; set; } = string.Empty;
-    public string FormaEntrega { get; set; } = string.Empty; // "Envío" o "Recoger"
-    public string? Direccion { get; set; }
-    public string ModalidadPago { get; set; } = string.Empty; // "Transferencia bancaria" o "Pago al recoger"
+    public string TelefonoCliente { get; set; } = string.Empty;
+    public DateTime FechaEntregaSolicitada { get; set; }
+
+    public int ModalidadEntregaId { get; set; }
+    public ModalidadEntrega? ModalidadEntrega { get; set; }
+
+    public string? DireccionOPuntoEntrega { get; set; }
+
+    public int MetodoPagoId { get; set; }
+    public MetodoPago? MetodoPago { get; set; }
+
+    public int EstadoPedidoId { get; set; }
+    public EstadoPedido? EstadoPedido { get; set; }
+
     public string? Comentarios { get; set; }
-    public decimal Total { get; set; }
-    public string Estado { get; set; } = EstadosPedido.Pendiente;
-    public DateTime FechaCreacion { get; set; } = DateTime.Now;
+    public DateTime FechaRegistro { get; set; } = DateTime.Now;
+
+    // Consideración futura ya anotada en el diseño de BD original: "Si
+    // posteriormente se implementan cuentas de usuario, el pedido puede
+    // incorporar id_usuario nullable sin perder los datos históricos
+    // nombre_cliente y telefono_cliente". Ya existen cuentas (ver Fase 2),
+    // así que se agrega desde ahora — sigue siendo NULL para pedidos de
+    // invitados si alguna vez se permitiera comprar sin cuenta.
+    public int? UsuarioId { get; set; }
+    public Usuario? Usuario { get; set; }
+
+    public List<PedidoDetalle> Detalles { get; set; } = new();
+    public List<HistorialEstadoPedido> Historial { get; set; } = new();
+
+    // Conveniencia (NO se guarda como columna): el diseño de BD documenta
+    // explícitamente que el total NO se persiste — se calcula a partir de
+    // pedido_detalle (sección 7 del documento de diseño).
+    public decimal Total => Detalles.Sum(d => d.PrecioUnitario * d.Cantidad);
 }
 
-// Estados definidos por el cliente en el análisis funcional del flujo de pedido.
+// Nombres oficiales de los 6 estados confirmados por el cliente (coinciden
+// con los valores ya cargados en la tabla estado_pedido). Sirven para
+// buscar el EstadoPedido correspondiente por nombre sin usar "texto mágico"
+// repetido por todo el código.
 public static class EstadosPedido
 {
     public const string Pendiente = "Pendiente";

@@ -26,6 +26,7 @@ const CapysMisFavoritos = (() => {
         // (la presentación más económica) como en la tarjeta del catálogo.
         CapysCarrito.agregarProducto({
             id: String(producto.id),
+            presentacionId: producto.presentacionId ?? null,
             nombre: producto.nombre,
             precio: producto.precio,
             cantidad: 1,

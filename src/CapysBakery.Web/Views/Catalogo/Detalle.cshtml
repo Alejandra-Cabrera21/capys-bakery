@@ -1,4 +1,4 @@
-@model Producto
+﻿@model Producto
 @{
     ViewData["Title"] = Model.Nombre;
 }
@@ -8,32 +8,47 @@
         <div class="cb-pd-main-img"><svg width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="#7C2B3B" stroke-width="1"><ellipse cx="12" cy="9" rx="7" ry="5"/><path d="M5 9v6a7 3 0 0 0 14 0V9"/></svg></div>
     </div>
     <div class="cb-pd-info">
-        <div class="cb-product-tag">@Model.Categoria personalizado</div>
+        <div class="cb-product-tag">@Model.CategoriaPrincipal personalizado</div>
         <h1>@Model.Nombre</h1>
         <div class="cb-pd-price" id="cb-pd-precio-mostrado">Q@(Model.Presentaciones.First().Precio.ToString("0.00"))</div>
         <p class="cb-pd-desc">@Model.Descripcion</p>
 
         <form id="form-agregar-carrito" data-producto-id="@Model.Id" data-producto-nombre="@Model.Nombre">
-            <div class="cb-config-block">
-                <h4>Tamaño / presentación</h4>
-                <div class="cb-size-options" data-config="tamano">
-                    @for (int i = 0; i < Model.Presentaciones.Count; i++)
-                    {
-                        var p = Model.Presentaciones[i];
-                        <button type="button" class="cb-size-option @(i == 0 ? "active" : "")"
-                                data-valor="@p.Nombre" data-precio="@p.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)">
-                            <span class="cb-size-name">@p.Nombre</span>
-                            <span class="cb-size-porciones">@p.Porciones porcion@(p.Porciones == 1 ? "" : "es")</span>
-                            <span class="cb-size-precio">Q@(p.Precio.ToString("0.00"))</span>
-                        </button>
-                    }
-                </div>
-            </div>
-
-            @if (Model.Categoria == "Pastel")
+            @if (Model.Presentaciones.Count > 1)
             {
                 <div class="cb-config-block">
-                    <h4>Color de decoración</h4>
+                    <h4>Tama├▒o / presentaci├│n</h4>
+                    <div class="cb-size-options" data-config="tamano">
+                        @for (int i = 0; i < Model.Presentaciones.Count; i++)
+                        {
+                            var p = Model.Presentaciones[i];
+                            <button type="button" class="cb-size-option @(i == 0 ? "active" : "")"
+                                    data-valor="@p.Nombre" data-precio="@p.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-presentacion-id="@p.Id">
+                                <span class="cb-size-name">@p.Nombre</span>
+                                <span class="cb-size-porciones">@p.Porciones porcion@(p.Porciones == 1 ? "" : "es")</span>
+                                <span class="cb-size-precio">Q@(p.Precio.ToString("0.00"))</span>
+                            </button>
+                        }
+                    </div>
+                </div>
+            }
+            else if (Model.Presentaciones.Count == 1)
+            {
+                // Un producto con una sola presentaci├│n no necesita
+                // selector ÔÇö solo se muestra el precio directo, tal como
+                // documenta el an├ílisis funcional de productos. El bot├│n
+                // sigue existiendo (oculto) para que configurador.js
+                // encuentre el mismo data-presentacion-id al armar el carrito.
+                var unica = Model.Presentaciones[0];
+                <button type="button" class="cb-size-option active" data-valor="@unica.Nombre"
+                        data-precio="@unica.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                        data-presentacion-id="@unica.Id" hidden></button>
+            }
+
+            @if (Model.CategoriaPrincipal == "Pastel" || Model.CategoriaPrincipal == "Pasteles")
+            {
+                <div class="cb-config-block">
+                    <h4>Color de decoraci├│n</h4>
                     <div class="cb-swatch-row" data-config="color">
                         <button type="button" class="cb-swatch active" data-valor="Ciruela" style="background:#7C2B3B;"></button>
                         <button type="button" class="cb-swatch" data-valor="Dorado" style="background:#C9982E;"></button>
@@ -56,11 +71,11 @@
             @if (Model.Alergenos.Any())
             {
                 <div class="cb-config-block">
-                    <h4>Alérgenos</h4>
+                    <h4>Al├®rgenos</h4>
                     <div class="cb-allergen-row">
                         @foreach (var alergeno in Model.Alergenos)
                         {
-                            <span class="cb-allergen-chip">⚠ @alergeno</span>
+                            <span class="cb-allergen-chip">ÔÜá @alergeno.Nombre</span>
                         }
                     </div>
                 </div>
@@ -69,14 +84,14 @@
             <div class="cb-qty-row">
                 <h4 style="margin:0;">Cantidad</h4>
                 <div class="cb-qty-box">
-                    <button type="button" class="cb-qty-minus">−</button>
+                    <button type="button" class="cb-qty-minus">ÔêÆ</button>
                     <span class="cb-qty-value">1</span>
                     <button type="button" class="cb-qty-plus">+</button>
                 </div>
             </div>
 
             <div class="cb-pd-btns">
-                <button type="button" class="btn cb-btn-outline" id="btn-agregar-favoritos" data-producto-id="@Model.Id">♡ Agregar a favoritos</button>
+                <button type="button" class="btn cb-btn-outline" id="btn-agregar-favoritos" data-producto-id="@Model.Id">ÔÖí Agregar a favoritos</button>
                 <button type="submit" class="btn cb-btn-plum" id="btn-agregar-carrito">Agregar al carrito</button>
             </div>
         </form>

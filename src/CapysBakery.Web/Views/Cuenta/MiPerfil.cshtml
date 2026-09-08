@@ -1,0 +1,51 @@
+@model Usuario
+@{
+    ViewData["Title"] = "Mi perfil";
+    var etiquetaRol = Model.Rol switch
+    {
+        RolUsuario.Dueño => "Dueño",
+        RolUsuario.Administrador => "Vendedor",
+        _ => "Cliente"
+    };
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Mi perfil</h1>
+    <p>Tus datos de cuenta y la opción para cambiar tu contraseña.</p>
+</div>
+
+<div class="cb-admin-layout" style="max-width:520px;">
+    <div class="cb-cf-summary-card" style="margin-bottom:24px;">
+        <div class="cb-summary-row"><span>Nombre</span><span>@Model.Nombre</span></div>
+        <div class="cb-summary-row"><span>Correo</span><span>@Model.Correo</span></div>
+        <div class="cb-summary-row"><span>Teléfono</span><span>@(Model.Telefono ?? "—")</span></div>
+        <div class="cb-summary-row"><span>Tipo de cuenta</span><span><span class="cb-estado-pill cb-estado-disponible">@etiquetaRol</span></span></div>
+    </div>
+
+    <h3 style="font-size:18px; margin-bottom:14px;">Cambiar contraseña</h3>
+
+    @if (ViewBag.Mensaje is not null)
+    {
+        <div class="cb-form-success">@ViewBag.Mensaje</div>
+    }
+    @if (ViewBag.Error is not null)
+    {
+        <div class="cb-form-error">@ViewBag.Error</div>
+    }
+
+    <form method="post" asp-controller="Cuenta" asp-action="CambiarPassword">
+        <div class="cb-cf-line">
+            <label for="passwordActual">Contraseña actual</label>
+            <input type="password" id="passwordActual" name="passwordActual" class="cb-form-input" required />
+        </div>
+        <div class="cb-cf-line">
+            <label for="passwordNueva">Contraseña nueva</label>
+            <input type="password" id="passwordNueva" name="passwordNueva" class="cb-form-input" required />
+        </div>
+        <div class="cb-cf-line">
+            <label for="confirmarPassword">Confirmar contraseña nueva</label>
+            <input type="password" id="confirmarPassword" name="confirmarPassword" class="cb-form-input" required />
+        </div>
+        <button type="submit" class="btn cb-btn-plum" style="width:100%;">Actualizar contraseña</button>
+    </form>
+</div>

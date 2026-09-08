@@ -1,5 +1,7 @@
+@model List<Pedido>
 @{
     ViewData["Title"] = "Gestión de pedidos";
+    var estados = ViewBag.Estados as List<EstadoPedido> ?? new();
 }
 
 <div class="cb-catalog-hero">
@@ -7,37 +9,61 @@
     <p>Consulta los pedidos recibidos, revisa el detalle y actualiza su estado.</p>
 </div>
 
-<div class="cb-admin-banner">
-    ⚠️ <b>Modo de prueba:</b> mientras no exista base de datos, aquí solo se ven los pedidos generados desde <b>este mismo navegador</b> (quedan guardados en <code>localStorage</code>). Los pedidos reales de clientes en otros dispositivos requieren la base de datos conectada.
-</div>
-
 <div class="cb-admin-layout">
-    <table class="cb-admin-table" id="cb-tabla-pedidos">
-        <thead>
-            <tr>
-                <th>Pedido</th>
-                <th>Cliente</th>
-                <th>Productos</th>
-                <th>Entrega</th>
-                <th>Pago</th>
-                <th>Total</th>
-                <th>Estado</th>
-            </tr>
-        </thead>
-        <tbody id="cb-pedidos-tbody">
-            <!-- llenado por admin-pedidos.js desde localStorage -->
-        </tbody>
-    </table>
+    @if (Model.Count == 0)
+    {
+        <div class="cb-cart-empty">
+            <p>Todavía no hay pedidos registrados.</p>
+            <a asp-controller="Catalogo" asp-action="Index" class="btn cb-btn-plum">Ir al catálogo</a>
+        </div>
+    }
+    else
+    {
+        <table class="cb-admin-table">
+            <thead>
+                <tr>
+                    <th>Pedido</th>
+                    <th>Cliente</th>
+                    <th>Productos</th>
+                    <th>Entrega</th>
+                    <th>Pago</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pedido in Model)
+                {
+                    var productos = string.Join(", ", pedido.Detalles.Select(d => $"{d.Cantidad}× {d.Presentacion?.Producto?.Nombre ?? "(producto eliminado)"} - {d.Presentacion?.Nombre}"));
 
-    <div id="cb-sin-pedidos" class="cb-cart-empty" style="display:none;">
-        <p>Todavía no hay pedidos registrados en este navegador.</p>
-        <a asp-controller="Catalogo" asp-action="Index" class="btn cb-btn-plum">Ir al catálogo</a>
-    </div>
+                    <tr>
+                        <td><span class="cb-admin-pedido-id">#@pedido.CodigoPedido</span></td>
+                        <td>@pedido.NombreCliente<br><span class="cb-admin-sub">@pedido.TelefonoCliente</span></td>
+                        <td>@productos</td>
+                        <td>
+                            @pedido.ModalidadEntrega?.Nombre
+                            @if (!string.IsNullOrEmpty(pedido.DireccionOPuntoEntrega))
+                            {
+                                <br>
+                                <span class="cb-admin-sub">@pedido.DireccionOPuntoEntrega</span>
+                            }
+                        </td>
+                        <td>@pedido.MetodoPago?.Nombre</td>
+                        <td>Q@pedido.Total.ToString("0.00")</td>
+                        <td>
+                            <form asp-controller="Admin" asp-action="CambiarEstadoPedido" method="post" class="cb-admin-estado-form">
+                                <input type="hidden" name="id" value="@pedido.Id" />
+                                <select name="nuevoEstadoId" class="cb-admin-estado-select" onchange="this.form.submit()">
+                                    @foreach (var estado in estados)
+                                    {
+                                        <option value="@estado.Id" selected="@(estado.Id == pedido.EstadoPedidoId)">@estado.Nombre</option>
+                                    }
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
 </div>
-
-@section Scripts {
-    <script src="~/js/admin-pedidos.js" asp-append-version="true"></script>
-    <script>
-        document.addEventListener('DOMContentLoaded', () => CapysAdminPedidos.renderizar());
-    </script>
-}

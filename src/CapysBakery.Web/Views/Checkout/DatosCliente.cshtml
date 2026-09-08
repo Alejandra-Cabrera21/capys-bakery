@@ -21,8 +21,15 @@
         <div class="cb-cf-line">
             <label>Forma de entrega</label>
             <div class="cb-toggle-row" data-config="entrega">
-                <button type="button" class="cb-toggle active" data-valor="Envío">📦 Envío</button>
-                <button type="button" class="cb-toggle" data-valor="Recoger">🏠 Recoger</button>
+                @{
+                    var modalidades = ViewBag.ModalidadesEntrega as List<CapysBakery.Web.Models.ModalidadEntrega> ?? new();
+                }
+                @for (var i = 0; i < modalidades.Count; i++)
+                {
+                    var modalidad = modalidades[i];
+                    var icono = modalidad.Nombre == "Envío" ? "📦" : "🏠";
+                    <button type="button" class="cb-toggle @(i == 0 ? "active" : "")" data-valor="@modalidad.Nombre" data-requiere-direccion="@modalidad.RequiereDireccion.ToString().ToLower()">@icono @modalidad.Nombre</button>
+                }
             </div>
         </div>
 
@@ -34,14 +41,31 @@
         <div class="cb-cf-line">
             <label>Modalidad de pago</label>
             <div class="cb-toggle-row" data-config="pago" id="cb-opciones-pago">
-                <button type="button" class="cb-toggle active" data-valor="Transferencia bancaria" data-para="envio,recoger">🏦 Transferencia bancaria</button>
-                <button type="button" class="cb-toggle" data-valor="Pago al recoger" data-para="recoger">💵 Pago al recoger</button>
+                @{
+                    var metodosPago = ViewBag.MetodosPago as List<CapysBakery.Web.Models.MetodoPago> ?? new();
+                }
+                @for (var i = 0; i < metodosPago.Count; i++)
+                {
+                    var metodo = metodosPago[i];
+                    var icono = metodo.SoloRecoger ? "💵" : "🏦";
+                    var para = metodo.SoloRecoger ? "recoger" : "envio,recoger";
+                    <button type="button" class="cb-toggle @(i == 0 ? "active" : "")" data-valor="@metodo.Nombre" data-para="@para">@icono @metodo.Nombre</button>
+                }
             </div>
             <p class="cb-hint-text">"Pago al recoger" (efectivo o transferencia en el momento) solo está disponible si eliges Recoger. Para Envío, únicamente Transferencia bancaria.</p>
 
             <div id="cb-datos-bancarios" style="display:block; margin-top:14px; background:var(--cream-2); border-radius:10px; padding:14px 16px;">
                 <p style="font-size:11.5px; font-weight:700; color:var(--ink); margin-bottom:8px;">Datos para transferencia:</p>
-                <div id="cb-dato-banco"></div>
+                @{
+                    var cuenta = ViewBag.CuentaBancaria as CapysBakery.Web.Models.CuentaBancaria;
+                }
+                @if (cuenta is not null)
+                {
+                    <div class="cb-summary-row"><span>Banco</span><span>@cuenta.Banco</span></div>
+                    <div class="cb-summary-row"><span>Tipo de cuenta</span><span>@cuenta.TipoCuenta</span></div>
+                    <div class="cb-summary-row"><span>Número de cuenta</span><span>@cuenta.NumeroCuenta</span></div>
+                    <div class="cb-summary-row"><span>Titular</span><span>@cuenta.Titular</span></div>
+                }
                 <p class="cb-hint-text" style="margin-top:10px; margin-bottom:0;">📲 Después de hacer la transferencia, envía tu comprobante de pago por WhatsApp para confirmar tu pedido.</p>
             </div>
         </div>

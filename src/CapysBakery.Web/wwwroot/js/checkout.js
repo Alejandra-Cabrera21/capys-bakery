@@ -13,20 +13,6 @@ const CapysCheckout = (() => {
     const CLAVE_PEDIDO_PENDIENTE = "capys_pedido_pendiente";
     const CLAVE_PEDIDOS_ADMIN = "capys_pedidos_admin"; // lista completa, para el panel de Administrador
 
-    // Datos bancarios que el cliente indicó que deben mostrarse al elegir
-    // Transferencia bancaria. TODO: mover a configuración real del Dueño.
-    const DATOS_BANCARIOS = {
-        banco: "Banco Industrial",
-        tipoCuenta: "Monetaria",
-        numeroCuenta: "0000-0000-00",
-        titular: "Capys Bakery",
-    };
-
-    function generarNumeroPedido() {
-        const numero = Math.floor(1000 + Math.random() * 9000);
-        return `CB-${numero}`;
-    }
-
     function armarMensajeWhatsApp(datosCliente, carrito, numeroPedido, total) {
         const lineas = [];
         lineas.push("Hola, realicé un pedido desde la página de Capys Bakery.");
@@ -97,17 +83,9 @@ const CapysCheckout = (() => {
             totalEl.textContent = CapysCarrito.formatearMoneda(total);
         }
 
-        // Datos bancarios en el HTML (rellenados aquí para que el equipo
-        // los pueda cambiar fácilmente desde una sola constante)
-        const elBanco = document.getElementById("cb-dato-banco");
-        if (elBanco) {
-            elBanco.innerHTML = `
-                <div class="cb-summary-row"><span>Banco</span><span>${DATOS_BANCARIOS.banco}</span></div>
-                <div class="cb-summary-row"><span>Tipo de cuenta</span><span>${DATOS_BANCARIOS.tipoCuenta}</span></div>
-                <div class="cb-summary-row"><span>Número de cuenta</span><span>${DATOS_BANCARIOS.numeroCuenta}</span></div>
-                <div class="cb-summary-row"><span>Titular</span><span>${DATOS_BANCARIOS.titular}</span></div>
-            `;
-        }
+        // Nota: los datos bancarios ya no se inyectan aquí por JS — desde
+        // la Fase 3, la vista los dibuja directamente en el servidor
+        // (ver Views/Checkout/DatosCliente.cshtml), usando IEntregaPagoRepository.
 
         // Toggle de forma de entrega (Envío / Recoger)
         document.querySelectorAll('[data-config="entrega"] .cb-toggle').forEach(boton => {
@@ -132,7 +110,7 @@ const CapysCheckout = (() => {
         actualizarOpcionesDePago(entregaActual);
 
         const form = document.getElementById("form-datos-cliente");
-        form?.addEventListener("submit", e => {
+        form?.addEventListener("submit", async e => {
             e.preventDefault();
 
             if (carrito.length === 0) {
@@ -158,14 +136,64 @@ const CapysCheckout = (() => {
                 metodoPago,
             };
 
-            const numeroPedido = generarNumeroPedido();
+            // Desde la Fase 4, el pedido SÍ se guarda de verdad en el
+            // servidor (antes solo vivía en localStorage). Se manda primero
+            // y se espera el código real que asigna el servidor
+            // (CB-00001, etc.) antes de armar el mensaje de WhatsApp.
+            const botonEnviar = document.getElementById("btn-continuar-whatsapp");
+            const textoOriginalBoton = botonEnviar?.textContent;
+            if (botonEnviar) { botonEnviar.disabled = true; botonEnviar.textContent = "Guardando pedido..."; }
+
+            let numeroPedido;
+            try {
+                const respuesta = await fetch("/Checkout/Confirmar", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    credentials: "same-origin",
+                    body: JSON.stringify({
+                        nombre: datosCliente.nombre,
+                        telefono: datosCliente.telefono,
+                        formaEntrega: datosCliente.formaEntrega,
+                        direccion: datosCliente.direccion,
+                        fecha: datosCliente.fecha,
+                        comentarios: datosCliente.comentarios,
+                        metodoPago: datosCliente.metodoPago,
+                        productos: carrito.map(item => ({
+                            id: Number(item.id),
+                            presentacionId: item.presentacionId ? Number(item.presentacionId) : null,
+                            nombre: item.nombre,
+                            precio: item.precio,
+                            cantidad: item.cantidad,
+                        })),
+                    }),
+                });
+
+                if (!respuesta.ok) {
+                    const error = await respuesta.json().catch(() => ({}));
+                    alert(error.mensaje || "No se pudo registrar tu pedido. Intenta de nuevo.");
+                    return;
+                }
+
+                const resultado = await respuesta.json();
+                numeroPedido = resultado.codigoPedido;
+            } catch {
+                alert("No se pudo conectar con el servidor. Revisa tu conexión e intenta de nuevo.");
+                return;
+            } finally {
+                if (botonEnviar) { botonEnviar.disabled = false; botonEnviar.textContent = textoOriginalBoton; }
+            }
+
             const mensaje = armarMensajeWhatsApp(datosCliente, carrito, numeroPedido, total);
 
             const pedido = {
                 identificador: numeroPedido,
-                // Sirve para que "Mis pedidos" (comprador) filtre solo sus
-                // propios pedidos dentro de este navegador. TODO (BD real):
-                // esto pasa a ser id_usuario, una FK real en la tabla pedido.
+                // Esta copia en localStorage sigue sirviendo para la pantalla
+                // de Confirmación y para el panel de Administrador / "Mis
+                // pedidos" (que todavía no se reconectaron a la BD real —
+                // eso queda para la Fase 6). El pedido YA se guardó de
+                // verdad en el servidor con id_usuario como FK real (ver
+                // Checkout/Confirmar); correoCliente aquí es solo para que
+                // este filtro local siga funcionando mientras tanto.
                 correoCliente: window.CAPYS_USUARIO_CORREO || null,
                 nombreCliente: datosCliente.nombre,
                 telefono: datosCliente.telefono,

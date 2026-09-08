@@ -27,4 +27,22 @@ public interface IProductoRepository
     // pensado para el catálogo público. El panel de administración necesita
     // ver también lo que está oculto para poder reactivarlo.
     List<Producto> ObtenerTodosIncluyendoNoDisponibles();
+
+    // El formulario de publicar producto sigue pidiendo la categoría y los
+    // alérgenos como texto simple (un campo de categoría, una lista separada
+    // por comas para alérgenos) para no complicar la interfaz. Estos
+    // métodos traducen ese texto a las entidades reales (Categoria,
+    // Alergeno), creándolas en el catálogo compartido si todavía no existen
+    // — igual que ya hacía Agregar() para categorías antes de este cambio.
+    Categoria ObtenerOCrearCategoria(string nombre);
+    List<Alergeno> ObtenerOCrearAlergenos(List<string> nombres);
+
+    // Gestión directa de categorías (crear/editar/desactivar), tal como
+    // el cliente confirmó que necesita en "Análisis funcional de las
+    // categorías" — independiente de crearlas "al vuelo" al publicar un
+    // producto.
+    List<Categoria> ObtenerTodasLasCategorias(); // incluye las desactivadas
+    Categoria? ObtenerCategoriaPorId(int id);
+    Categoria CrearCategoria(string nombre);
+    bool ActualizarCategoria(int id, string nuevoNombre, bool disponible);
 }
