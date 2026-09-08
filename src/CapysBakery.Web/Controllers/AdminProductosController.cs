@@ -52,7 +52,7 @@ public class AdminProductosController : Controller
     // categorías "al vuelo".
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Crear(Producto producto, IFormFile? imagen, string? categoriaTexto, string? alergenosTexto)
+    public async Task<IActionResult> Crear(Producto producto, IFormFile? imagen, IFormFile? imagenSecundaria, string? categoriaTexto, string? alergenosTexto)
     {
         if (string.IsNullOrWhiteSpace(producto.Nombre) || string.IsNullOrWhiteSpace(categoriaTexto))
         {
@@ -70,6 +70,17 @@ public class AdminProductosController : Controller
             return View("Formulario", producto);
         }
 
+        // El cliente confirmó que la imagen principal es obligatoria
+        // (Preguntas al cliente sobre productos): normalmente usa una,
+        // pero puede subir una segunda opcional.
+        if (imagen is null || imagen.Length == 0)
+        {
+            ModelState.AddModelError(string.Empty, "La imagen principal es obligatoria.");
+            ViewBag.Categorias = _productoRepository.ObtenerCategorias();
+            ViewBag.EsEdicion = false;
+            return View("Formulario", producto);
+        }
+
         // El "precio desde" mostrado en catálogo/inicio es el de la
         // presentación más económica, igual que documenta el diseño de BD.
         producto.Precio = producto.Presentaciones.Min(p => p.Precio);
@@ -77,10 +88,13 @@ public class AdminProductosController : Controller
         producto.Alergenos = _productoRepository.ObtenerOCrearAlergenos(DividirTexto(alergenosTexto));
         producto.CreadoPorCorreo = User.Identity?.Name;
 
-        if (imagen is not null && imagen.Length > 0)
+        var urlPrincipal = await GuardarImagenAsync(imagen);
+        producto.Imagenes.Add(new ImagenProducto { UrlImagen = urlPrincipal, Orden = 1, EsPrincipal = true });
+
+        if (imagenSecundaria is not null && imagenSecundaria.Length > 0)
         {
-            var url = await GuardarImagenAsync(imagen);
-            producto.Imagenes.Add(new ImagenProducto { UrlImagen = url, Orden = 1, EsPrincipal = true });
+            var urlSecundaria = await GuardarImagenAsync(imagenSecundaria);
+            producto.Imagenes.Add(new ImagenProducto { UrlImagen = urlSecundaria, Orden = 2, EsPrincipal = false });
         }
 
         _productoRepository.Agregar(producto);
@@ -102,7 +116,7 @@ public class AdminProductosController : Controller
     // POST /AdminProductos/Editar/3
     [HttpPost]
     [ValidateAntiForgeryToken]
-    public async Task<IActionResult> Editar(int id, Producto producto, IFormFile? imagen, string? categoriaTexto, string? alergenosTexto)
+    public async Task<IActionResult> Editar(int id, Producto producto, IFormFile? imagen, IFormFile? imagenSecundaria, string? categoriaTexto, string? alergenosTexto)
     {
         producto.Id = id;
 
@@ -121,10 +135,17 @@ public class AdminProductosController : Controller
         }
         producto.Alergenos = _productoRepository.ObtenerOCrearAlergenos(DividirTexto(alergenosTexto));
 
+        // Solo se reemplaza cada imagen si llega un archivo nuevo para esa
+        // posición; si no, el repositorio conserva las que ya tenía.
         if (imagen is not null && imagen.Length > 0)
         {
             var url = await GuardarImagenAsync(imagen);
             producto.Imagenes.Add(new ImagenProducto { UrlImagen = url, Orden = 1, EsPrincipal = true });
+        }
+        if (imagenSecundaria is not null && imagenSecundaria.Length > 0)
+        {
+            var url = await GuardarImagenAsync(imagenSecundaria);
+            producto.Imagenes.Add(new ImagenProducto { UrlImagen = url, Orden = 2, EsPrincipal = false });
         }
 
         var actualizado = _productoRepository.Actualizar(producto);

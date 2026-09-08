@@ -36,4 +36,13 @@ public interface IProductoRepository
     // — igual que ya hacía Agregar() para categorías antes de este cambio.
     Categoria ObtenerOCrearCategoria(string nombre);
     List<Alergeno> ObtenerOCrearAlergenos(List<string> nombres);
+
+    // Gestión directa de categorías (crear/editar/desactivar), tal como
+    // el cliente confirmó que necesita en "Análisis funcional de las
+    // categorías" — independiente de crearlas "al vuelo" al publicar un
+    // producto.
+    List<Categoria> ObtenerTodasLasCategorias(); // incluye las desactivadas
+    Categoria? ObtenerCategoriaPorId(int id);
+    Categoria CrearCategoria(string nombre);
+    bool ActualizarCategoria(int id, string nuevoNombre, bool disponible);
 }

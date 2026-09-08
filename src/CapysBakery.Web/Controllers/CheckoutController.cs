@@ -74,6 +74,19 @@ public class CheckoutController : Controller
             return BadRequest(new { mensaje = "Forma de entrega o método de pago inválido." });
         }
 
+        // Reglas de negocio documentadas en "Análisis funcional de las
+        // modalidades de pago" — deben validarse aquí, no solo en el
+        // navegador, porque este endpoint puede recibir peticiones
+        // directas que se salten la interfaz.
+        if (metodoPago.SoloRecoger && modalidad.RequiereDireccion)
+        {
+            return BadRequest(new { mensaje = "\"Pago al recoger\" solo está disponible cuando la entrega es Recoger." });
+        }
+        if (modalidad.RequiereDireccion && string.IsNullOrWhiteSpace(entrada.Direccion))
+        {
+            return BadRequest(new { mensaje = "La dirección de entrega es obligatoria para Envío." });
+        }
+
         var usuarioIdTexto = User.FindFirstValue(ClaimTypes.NameIdentifier);
         int? usuarioId = int.TryParse(usuarioIdTexto, out var id) ? id : null;
 

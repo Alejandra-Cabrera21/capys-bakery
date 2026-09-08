@@ -73,6 +73,34 @@ public class EfProductoRepository : IProductoRepository
         return resultado;
     }
 
+    public List<Categoria> ObtenerTodasLasCategorias() =>
+        _db.Categorias.OrderBy(c => c.Nombre).ToList();
+
+    public Categoria? ObtenerCategoriaPorId(int id) =>
+        _db.Categorias.FirstOrDefault(c => c.Id == id);
+
+    public Categoria CrearCategoria(string nombre)
+    {
+        var existente = _db.Categorias.FirstOrDefault(c => c.Nombre == nombre);
+        if (existente is not null) return existente;
+
+        var nueva = new Categoria { Nombre = nombre, Disponible = true };
+        _db.Categorias.Add(nueva);
+        _db.SaveChanges();
+        return nueva;
+    }
+
+    public bool ActualizarCategoria(int id, string nuevoNombre, bool disponible)
+    {
+        var categoria = _db.Categorias.FirstOrDefault(c => c.Id == id);
+        if (categoria is null) return false;
+
+        categoria.Nombre = nuevoNombre;
+        categoria.Disponible = disponible;
+        _db.SaveChanges();
+        return true;
+    }
+
     public Producto Agregar(Producto producto)
     {
         _db.Productos.Add(producto);
@@ -101,10 +129,23 @@ public class EfProductoRepository : IProductoRepository
         _db.ProductoPresentaciones.RemoveRange(existente.Presentaciones);
         existente.Presentaciones = producto.Presentaciones;
 
-        // Las imágenes solo se reemplazan si llega al menos una nueva.
-        if (producto.Imagenes.Any())
+        // Cada imagen se reemplaza por separado según su "slot" (principal
+        // o secundaria) — subir una nueva imagen principal NO debe borrar
+        // la secundaria que ya tenía, y viceversa.
+        var nuevaPrincipal = producto.Imagenes.FirstOrDefault(i => i.EsPrincipal);
+        if (nuevaPrincipal is not null)
         {
-            existente.Imagenes = producto.Imagenes;
+            var actual = existente.Imagenes.FirstOrDefault(i => i.EsPrincipal);
+            if (actual is not null) _db.ImagenesProducto.Remove(actual);
+            existente.Imagenes.Add(nuevaPrincipal);
+        }
+
+        var nuevaSecundaria = producto.Imagenes.FirstOrDefault(i => !i.EsPrincipal);
+        if (nuevaSecundaria is not null)
+        {
+            var actual = existente.Imagenes.FirstOrDefault(i => !i.EsPrincipal);
+            if (actual is not null) _db.ImagenesProducto.Remove(actual);
+            existente.Imagenes.Add(nuevaSecundaria);
         }
 
         _db.SaveChanges();

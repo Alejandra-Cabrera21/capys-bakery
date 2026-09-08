@@ -45,7 +45,7 @@
                     <div class="cb-product-name">@producto.Nombre</div>
                     <div class="cb-product-desc">@producto.Descripcion</div>
                     <div class="cb-product-foot">
-                        <div class="cb-product-price">Desde Q@producto.Precio</div>
+                        <div class="cb-product-price">Desde Q@(producto.Precio.ToString("0.00"))</div>
                         <span class="cb-add-btn">+</span>
                     </div>
                 </div>
@@ -77,7 +77,7 @@
                             <div class="cb-product-name">@promo.Nombre</div>
                             <div class="cb-product-desc">@promo.Descripcion</div>
                             <div class="cb-product-foot">
-                                <span class="cb-product-price">Desde Q@promo.Precio</span>
+                                <span class="cb-product-price">Desde Q@(promo.Precio.ToString("0.00"))</span>
                                 <span class="cb-add-btn">+</span>
                             </div>
                         </div>

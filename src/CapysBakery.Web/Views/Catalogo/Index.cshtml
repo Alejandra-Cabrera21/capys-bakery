@@ -14,10 +14,13 @@
     <aside class="cb-filters">
         <h5>Categoría</h5>
         <a asp-action="Index" class="cb-filter-chip @(categoriaSeleccionada == null ? "active" : "")">Todos</a>
-        <a asp-action="Index" asp-route-categoria="Tartaleta" class="cb-filter-chip @(categoriaSeleccionada == "Tartaleta" ? "active" : "")">Tartaletas</a>
-        <a asp-action="Index" asp-route-categoria="Pie" class="cb-filter-chip @(categoriaSeleccionada == "Pie" ? "active" : "")">Pies</a>
-        <a asp-action="Index" asp-route-categoria="Pastel" class="cb-filter-chip @(categoriaSeleccionada == "Pastel" ? "active" : "")">Pasteles</a>
-        <a asp-action="Index" asp-route-categoria="Mermelada" class="cb-filter-chip @(categoriaSeleccionada == "Mermelada" ? "active" : "")">Mermeladas</a>
+        @{
+            var categorias = ViewBag.Categorias as List<Categoria> ?? new();
+        }
+        @foreach (var categoria in categorias)
+        {
+            <a asp-action="Index" asp-route-categoria="@categoria.Nombre" class="cb-filter-chip @(categoriaSeleccionada == categoria.Nombre ? "active" : "")">@categoria.Nombre</a>
+        }
     </aside>
 
     <div class="cb-catalog-grid-wrap">
@@ -34,7 +37,7 @@
                         <div class="cb-product-name">@producto.Nombre</div>
                         <div class="cb-product-desc">@producto.Descripcion</div>
                         <div class="cb-product-foot">
-                            <span class="cb-product-price">Desde Q@producto.Precio</span>
+                            <span class="cb-product-price">Desde Q@(producto.Precio.ToString("0.00"))</span>
                             <span class="cb-add-btn">+</span>
                         </div>
                     </div>

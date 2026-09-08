@@ -42,6 +42,7 @@
                             <button type="button" class="cb-nav-dropdown-trigger">Panel ▾</button>
                             <div class="cb-nav-dropdown-panel">
                                 <a asp-controller="AdminProductos" asp-action="Index" class="@(currentController == "AdminProductos" ? "active" : "")">Productos</a>
+                                <a asp-controller="AdminCategorias" asp-action="Index" class="@(currentController == "AdminCategorias" ? "active" : "")">Categorías</a>
                                 <a asp-controller="Admin" asp-action="Pedidos" class="@(currentController == "Admin" ? "active" : "")">Pedidos</a>
                                 <a asp-controller="AdminBlog" asp-action="Index" class="@(currentController == "AdminBlog" ? "active" : "")">Blog</a>
                                 @if (User.IsInRole("Dueño"))
@@ -107,10 +108,9 @@
                 </div>
                 <p>Repostería artesanal hecha con ingredientes reales, en pequeños lotes, desde Guatemala.</p>
                 <div class="cb-social-row">
-                    <!-- TODO: reemplazar # por los links reales de Instagram/Facebook/TikTok del negocio -->
-                    <a href="#" class="cb-social-dot" title="Instagram" target="_blank" rel="noopener">IG</a>
-                    <a href="#" class="cb-social-dot" title="Facebook" target="_blank" rel="noopener">FB</a>
-                    <a href="#" class="cb-social-dot" title="TikTok" target="_blank" rel="noopener">TT</a>
+                    <a href="https://www.facebook.com/share/1DRGX2Ycst/" class="cb-social-dot" title="Facebook" target="_blank" rel="noopener">FB</a>
+                    <a href="https://www.instagram.com/capysbakery__?igsi=MWZ1M3RvcXVlZXl4eA==" class="cb-social-dot" title="Instagram" target="_blank" rel="noopener">IG</a>
+                    <a href="https://www.tiktok.com/@@capys.bakery?_r=1&_t=ZS-99SQcP119AF" class="cb-social-dot" title="TikTok" target="_blank" rel="noopener">TT</a>
                 </div>
             </div>
             <div class="cb-footer-col">
@@ -132,7 +132,7 @@
             </div>
             <div class="cb-footer-col">
                 <h5>Contacto</h5>
-                <div><a href="tel:+50255551234">+502 5555 1234</a></div>
+                <div><a href="tel:+50248036717">+502 4803 6717</a></div>
                 <div><a href="mailto:hola@capysbakery.com">hola@capysbakery.com</a></div>
                 <div><a href="https://maps.google.com/?q=Zona+14,+Ciudad+de+Guatemala" target="_blank" rel="noopener">Zona 14, Ciudad de Guatemala</a></div>
             </div>

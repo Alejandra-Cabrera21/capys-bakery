@@ -14,21 +14,36 @@
         <p class="cb-pd-desc">@Model.Descripcion</p>
 
         <form id="form-agregar-carrito" data-producto-id="@Model.Id" data-producto-nombre="@Model.Nombre">
-            <div class="cb-config-block">
-                <h4>Tamaño / presentación</h4>
-                <div class="cb-size-options" data-config="tamano">
-                    @for (int i = 0; i < Model.Presentaciones.Count; i++)
-                    {
-                        var p = Model.Presentaciones[i];
-                        <button type="button" class="cb-size-option @(i == 0 ? "active" : "")"
-                                data-valor="@p.Nombre" data-precio="@p.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-presentacion-id="@p.Id">
-                            <span class="cb-size-name">@p.Nombre</span>
-                            <span class="cb-size-porciones">@p.Porciones porcion@(p.Porciones == 1 ? "" : "es")</span>
-                            <span class="cb-size-precio">Q@(p.Precio.ToString("0.00"))</span>
-                        </button>
-                    }
+            @if (Model.Presentaciones.Count > 1)
+            {
+                <div class="cb-config-block">
+                    <h4>Tamaño / presentación</h4>
+                    <div class="cb-size-options" data-config="tamano">
+                        @for (int i = 0; i < Model.Presentaciones.Count; i++)
+                        {
+                            var p = Model.Presentaciones[i];
+                            <button type="button" class="cb-size-option @(i == 0 ? "active" : "")"
+                                    data-valor="@p.Nombre" data-precio="@p.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)" data-presentacion-id="@p.Id">
+                                <span class="cb-size-name">@p.Nombre</span>
+                                <span class="cb-size-porciones">@p.Porciones porcion@(p.Porciones == 1 ? "" : "es")</span>
+                                <span class="cb-size-precio">Q@(p.Precio.ToString("0.00"))</span>
+                            </button>
+                        }
+                    </div>
                 </div>
-            </div>
+            }
+            else if (Model.Presentaciones.Count == 1)
+            {
+                // Un producto con una sola presentación no necesita
+                // selector — solo se muestra el precio directo, tal como
+                // documenta el análisis funcional de productos. El botón
+                // sigue existiendo (oculto) para que configurador.js
+                // encuentre el mismo data-presentacion-id al armar el carrito.
+                var unica = Model.Presentaciones[0];
+                <button type="button" class="cb-size-option active" data-valor="@unica.Nombre"
+                        data-precio="@unica.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                        data-presentacion-id="@unica.Id" hidden></button>
+            }
 
             @if (Model.CategoriaPrincipal == "Pastel" || Model.CategoriaPrincipal == "Pasteles")
             {
