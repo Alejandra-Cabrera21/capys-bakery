@@ -1,0 +1,69 @@
+@model List<Pedido>
+@{
+    ViewData["Title"] = "Gestión de pedidos";
+    var estados = ViewBag.Estados as List<EstadoPedido> ?? new();
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Gestión de pedidos</h1>
+    <p>Consulta los pedidos recibidos, revisa el detalle y actualiza su estado.</p>
+</div>
+
+<div class="cb-admin-layout">
+    @if (Model.Count == 0)
+    {
+        <div class="cb-cart-empty">
+            <p>Todavía no hay pedidos registrados.</p>
+            <a asp-controller="Catalogo" asp-action="Index" class="btn cb-btn-plum">Ir al catálogo</a>
+        </div>
+    }
+    else
+    {
+        <table class="cb-admin-table">
+            <thead>
+                <tr>
+                    <th>Pedido</th>
+                    <th>Cliente</th>
+                    <th>Productos</th>
+                    <th>Entrega</th>
+                    <th>Pago</th>
+                    <th>Total</th>
+                    <th>Estado</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var pedido in Model)
+                {
+                    var productos = string.Join(", ", pedido.Detalles.Select(d => $"{d.Cantidad}× {d.Presentacion?.Producto?.Nombre ?? "(producto eliminado)"} - {d.Presentacion?.Nombre}"));
+
+                    <tr>
+                        <td><span class="cb-admin-pedido-id">#@pedido.CodigoPedido</span></td>
+                        <td>@pedido.NombreCliente<br><span class="cb-admin-sub">@pedido.TelefonoCliente</span></td>
+                        <td>@productos</td>
+                        <td>
+                            @pedido.ModalidadEntrega?.Nombre
+                            @if (!string.IsNullOrEmpty(pedido.DireccionOPuntoEntrega))
+                            {
+                                <br>
+                                <span class="cb-admin-sub">@pedido.DireccionOPuntoEntrega</span>
+                            }
+                        </td>
+                        <td>@pedido.MetodoPago?.Nombre</td>
+                        <td>Q@pedido.Total.ToString("0.00")</td>
+                        <td>
+                            <form asp-controller="Admin" asp-action="CambiarEstadoPedido" method="post" class="cb-admin-estado-form">
+                                <input type="hidden" name="id" value="@pedido.Id" />
+                                <select name="nuevoEstadoId" class="cb-admin-estado-select" onchange="this.form.submit()">
+                                    @foreach (var estado in estados)
+                                    {
+                                        <option value="@estado.Id" selected="@(estado.Id == pedido.EstadoPedidoId)">@estado.Nombre</option>
+                                    }
+                                </select>
+                            </form>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+</div>

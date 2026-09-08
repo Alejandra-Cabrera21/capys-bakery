@@ -1,0 +1,50 @@
+@model List<Categoria>
+@{
+    ViewData["Title"] = "Gestión de categorías";
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Gestión de categorías</h1>
+    <p>Crea categorías nuevas, cambia su nombre, o desactívalas temporalmente (ej. "Ediciones especiales" en Navidad).</p>
+</div>
+
+<div class="cb-admin-layout">
+    @if (TempData["Mensaje"] is not null)
+    {
+        <div class="cb-form-success">@TempData["Mensaje"]</div>
+    }
+
+    <div class="cb-admin-toolbar">
+        <span class="cb-admin-sub">@Model.Count categoría(s)</span>
+        <a asp-controller="AdminCategorias" asp-action="Crear" class="btn cb-btn-plum">+ Nueva categoría</a>
+    </div>
+
+    <table class="cb-admin-table">
+        <thead>
+            <tr>
+                <th>Nombre</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var categoria in Model)
+            {
+                <tr>
+                    <td>@categoria.Nombre</td>
+                    <td>
+                        <span class="cb-estado-pill @(categoria.Disponible ? "cb-estado-disponible" : "cb-estado-oculto")">
+                            @(categoria.Disponible ? "Activa" : "Desactivada")
+                        </span>
+                    </td>
+                    <td style="text-align:right; white-space:nowrap;">
+                        <a asp-controller="AdminCategorias" asp-action="Editar" asp-route-id="@categoria.Id" class="cb-admin-link">Editar</a>
+                        <form asp-controller="AdminCategorias" asp-action="CambiarDisponibilidad" asp-route-id="@categoria.Id" method="post" style="display:inline;">
+                            <button type="submit" class="cb-admin-link cb-admin-link-btn">@(categoria.Disponible ? "Desactivar" : "Activar")</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

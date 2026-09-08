@@ -1,0 +1,34 @@
+@model Categoria
+@{
+    ViewData["Title"] = "Editar categoría";
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Editar categoría</h1>
+    <p>Cambia el nombre o desactívala temporalmente sin borrar los productos que ya la usan.</p>
+</div>
+
+<div class="cb-admin-layout" style="max-width:480px;">
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="cb-form-error">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@error.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    <form method="post" asp-controller="AdminCategorias" asp-action="Editar" asp-route-id="@Model.Id">
+        <div class="cb-cf-line">
+            <label for="nombre">Nombre de la categoría</label>
+            <input type="text" id="nombre" name="nombre" class="cb-form-input" value="@Model.Nombre" required />
+        </div>
+        <div class="cb-cf-line" style="margin: 4px 0 20px 0;">
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px;">
+                <input type="checkbox" name="disponible" value="true" checked="@Model.Disponible" /> Activa (visible en el catálogo y al publicar productos)
+            </label>
+        </div>
+        <button type="submit" class="btn cb-btn-plum" style="width:100%;">Guardar cambios</button>
+    </form>
+</div>

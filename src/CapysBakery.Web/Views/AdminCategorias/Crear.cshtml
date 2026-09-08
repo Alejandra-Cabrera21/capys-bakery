@@ -1,0 +1,28 @@
+@{
+    ViewData["Title"] = "Nueva categoría";
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Nueva categoría</h1>
+    <p>Se crea activa por defecto — podrás desactivarla después si ya no la necesitas.</p>
+</div>
+
+<div class="cb-admin-layout" style="max-width:480px;">
+    @if (!ViewData.ModelState.IsValid)
+    {
+        <div class="cb-form-error">
+            @foreach (var error in ViewData.ModelState.Values.SelectMany(v => v.Errors))
+            {
+                <div>@error.ErrorMessage</div>
+            }
+        </div>
+    }
+
+    <form method="post" asp-controller="AdminCategorias" asp-action="Crear">
+        <div class="cb-cf-line">
+            <label for="nombre">Nombre de la categoría</label>
+            <input type="text" id="nombre" name="nombre" class="cb-form-input" placeholder="Ej. Ediciones especiales" required />
+        </div>
+        <button type="submit" class="btn cb-btn-plum" style="width:100%;">Crear categoría</button>
+    </form>
+</div>

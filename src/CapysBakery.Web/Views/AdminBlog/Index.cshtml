@@ -1,0 +1,61 @@
+@model List<Publicacion>
+@{
+    ViewData["Title"] = "Gestión del blog";
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Gestión del blog</h1>
+    <p>Publica entradas nuevas, edítalas o retíralas del blog público sin borrarlas.</p>
+</div>
+
+<div class="cb-admin-layout">
+    @if (TempData["Mensaje"] is not null)
+    {
+        <div class="cb-form-success">@TempData["Mensaje"]</div>
+    }
+
+    <div class="cb-admin-toolbar">
+        <span class="cb-admin-sub">@Model.Count publicación(es)</span>
+        <a asp-controller="AdminBlog" asp-action="Crear" class="btn cb-btn-plum">+ Nueva publicación</a>
+    </div>
+
+    <table class="cb-admin-table">
+        <thead>
+            <tr>
+                <th>Título</th>
+                <th>Categoría</th>
+                <th>Fecha</th>
+                <th>Estado</th>
+                <th></th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var publicacion in Model)
+            {
+                <tr>
+                    <td>
+                        <b>@publicacion.Titulo</b>
+                        @if (!string.IsNullOrEmpty(publicacion.AutorCorreo))
+                        {
+                            <br>
+                            <span class="cb-admin-sub">Por @publicacion.AutorCorreo</span>
+                        }
+                    </td>
+                    <td>@publicacion.Categoria</td>
+                    <td>@publicacion.FechaPublicacion.ToString("d MMM yyyy")</td>
+                    <td>
+                        <span class="cb-estado-pill @(publicacion.Publicada ? "cb-estado-disponible" : "cb-estado-oculto")">
+                            @(publicacion.Publicada ? "Publicada" : "Oculta")
+                        </span>
+                    </td>
+                    <td style="text-align:right; white-space:nowrap;">
+                        <a asp-controller="AdminBlog" asp-action="Editar" asp-route-id="@publicacion.Id" class="cb-admin-link">Editar</a>
+                        <form asp-controller="AdminBlog" asp-action="CambiarPublicada" asp-route-id="@publicacion.Id" method="post" style="display:inline;">
+                            <button type="submit" class="cb-admin-link cb-admin-link-btn">@(publicacion.Publicada ? "Ocultar" : "Publicar")</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>

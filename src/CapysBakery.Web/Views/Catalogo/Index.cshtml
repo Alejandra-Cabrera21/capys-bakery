@@ -1,0 +1,48 @@
+@model List<Producto>
+@{
+    ViewData["Title"] = "Menú";
+    string? categoriaSeleccionada = ViewBag.CategoriaSeleccionada;
+}
+
+<div class="cb-catalog-hero">
+    <span class="eyebrow">nuestro menú</span>
+    <h1>Todo lo que horneamos</h1>
+    <p>Tartaletas, pies, pasteles y mermeladas — filtra por categoría para encontrar tu antojo.</p>
+</div>
+
+<div class="cb-catalog-layout">
+    <aside class="cb-filters">
+        <h5>Categoría</h5>
+        <a asp-action="Index" class="cb-filter-chip @(categoriaSeleccionada == null ? "active" : "")">Todos</a>
+        @{
+            var categorias = ViewBag.Categorias as List<Categoria> ?? new();
+        }
+        @foreach (var categoria in categorias)
+        {
+            <a asp-action="Index" asp-route-categoria="@categoria.Nombre" class="cb-filter-chip @(categoriaSeleccionada == categoria.Nombre ? "active" : "")">@categoria.Nombre</a>
+        }
+    </aside>
+
+    <div class="cb-catalog-grid-wrap">
+        <div class="cb-sort-row">
+            <span class="cb-count">@Model.Count productos</span>
+        </div>
+        <div class="cb-grid-3">
+            @foreach (var producto in Model)
+            {
+                <a asp-action="Detalle" asp-route-id="@producto.Id" class="cb-product-card">
+                    <div class="cb-product-img" style="background:linear-gradient(135deg,#F2D6C9,#E8B876);"></div>
+                    <div class="cb-product-body">
+                        <div class="cb-product-tag">@producto.CategoriaPrincipal</div>
+                        <div class="cb-product-name">@producto.Nombre</div>
+                        <div class="cb-product-desc">@producto.Descripcion</div>
+                        <div class="cb-product-foot">
+                            <span class="cb-product-price">Desde Q@(producto.Precio.ToString("0.00"))</span>
+                            <span class="cb-add-btn">+</span>
+                        </div>
+                    </div>
+                </a>
+            }
+        </div>
+    </div>
+</div>

@@ -1,34 +1,67 @@
 # Código fuente
 
-Esta carpeta está vacía a propósito. El proyecto **ASP.NET Core MVC** se crea aquí mismo cuando el equipo lo genere desde Visual Studio (`File → New Project → ASP.NET Core Web App (Model-View-Controller)`, nombrado `CapysBakery.Web`, con esta carpeta `src/` como ubicación).
+Proyecto **ASP.NET Core MVC** (.NET 10), en `CapysBakery.Web/`.
 
-No pre-creamos `Controllers/`, `Views/`, `Models/`, etc. a mano porque Visual Studio los genera automáticamente con los archivos reales del proyecto (`.csproj`, `Program.cs`, `_Layout.cshtml`, Bootstrap ya instalado, etc.). Crearlos antes solo generaría carpetas vacías que luego se mezclarían con las reales sin aportar nada.
+## Ya construido (funciona sin base de datos)
 
-Lo que sí documentamos de antemano es **el plan de organización**, para que cuando el proyecto exista, cada quien sepa exactamente dónde trabaja.
+| Módulo | Controller | Vistas | Cómo obtiene datos |
+|---|---|---|---|
+| Inicio | `HomeController` | Views/Home | `IProductoRepository` (mock) |
+| Catálogo + Detalle/Configurador | `CatalogoController` | Views/Catalogo | `IProductoRepository` (mock) |
+| Carrito | `CarritoController` | Views/Carrito | `localStorage` (JS, `carrito.js`) |
+| Checkout (datos cliente + WhatsApp + confirmación) | `CheckoutController` | Views/Checkout | `localStorage` + genera link `wa.me` (JS, `checkout.js`) |
+| Cuenta (login/registro) | `CuentaController` | Views/Cuenta | Interfaz sin lógica real (pendiente de Identity) |
+| Gestión de pedidos (Administrador) | `AdminController` | Views/Admin/Pedidos | `localStorage` — **solo pedidos del mismo navegador**, ver nota abajo |
+| Nosotros, Eventos, Blog, Contacto | `NosotrosController`, `EventosController`, `BlogController`, `ContactoController` | Views/(mismo nombre) | Contenido fijo en la vista |
 
-## Plan de Controllers y Views por módulo
+## Alineado con los documentos de análisis funcional del cliente
 
-| Controller (a crear) | Responsable | Vistas relacionadas |
-|---|---|---|
-| `HomeController` | Sergio | Views/Home |
-| `CuentaController` (login/registro, Identity) | Sergio | Views/Cuenta |
-| `CatalogoController` | Alejandra | Views/Catalogo |
-| `CarritoController` | Alejandra | Views/Carrito |
-| `CheckoutController` (incluye redirección a WhatsApp) | Angie | Views/Checkout |
-| `AdminController` | Rafa | Views/Admin |
-| `DuenoController` | Sergio | Views/Dueño |
-| `NosotrosController`, `EventosController`, `BlogController`, `ContactoController` | Sergio | Views/Nosotros, Eventos, Blog, Contacto |
+Esta versión incorpora las precisiones que el cliente confirmó en sus documentos de análisis funcional:
 
-## Otras carpetas que se generarán dentro de `CapysBakery.Web/`
+- **Número de WhatsApp real**: `+502 4803 6717` (personal del cliente, mientras no tenga uno dedicado al negocio) — configurado en `checkout.js`.
+- **Terminología exacta**: "Envío" y "Recoger" (no "domicilio"/"tienda"), y "Comentarios" (no "Notas"), tal como los nombra el cliente.
+- **Transferencia bancaria** ahora muestra Banco, Tipo de cuenta, Número de cuenta y Titular (datos de ejemplo — `TODO` marcado para reemplazarlos por los reales del Dueño).
+- **"Pago al recoger"** solo aparece si la forma de entrega es "Recoger" — nunca para "Envío" (regla explícita del cliente).
+- **Estados del pedido completos**: Pendiente → Confirmado → En preparación → **Listo** → Entregado, o Cancelado (antes faltaba "Listo").
+- **Panel de gestión de pedidos** (`/Admin/Pedidos`): el cliente lo definió como funcionalidad **crítica** del MVP (sección 3.9 del documento de alcance). Como no hay base de datos, esta versión solo puede leer pedidos guardados en el `localStorage` del mismo navegador donde se probó la compra — **no ve pedidos de otros clientes/dispositivos**. Está marcado con un aviso visible en la propia página para que nadie lo confunda con la versión real. Cuando exista la base de datos, esto se reemplaza por una consulta real a la tabla `Pedidos`.
+- Sin enlaces públicos hacia `/Admin/Pedidos` (según la especificación de roles) — se accede escribiendo la URL directamente mientras se prueba.
 
-- **`Models/`** — Clases de datos y ViewModels (Producto, Pedido, Usuario, etc.).
-- **`Data/`** — DbContext de Entity Framework Core y conexión a SQL Server, o la capa de Repository + Stored Procedures si el equipo elige ese enfoque.
-- **`wwwroot/`** — CSS, JS e imágenes. Bootstrap ya viene incluido en la plantilla de Visual Studio; sobre esa base se aplica la identidad visual definida en `../design/mockups/` (paleta cálida: crema `#FBF1E4`, dorado `#C9982E`, ciruela `#7C2B3B`; tipografía *Fraunces* para títulos).
 
-## Roles y autenticación
+## La pieza clave: `Services/IProductoRepository`
 
-Gestionados con **ASP.NET Core Identity** (Visitante = sin autenticar, Cliente, Administrador, Dueño). Detalle completo de permisos en [`../docs/capys-roles-especificacion.docx`](../docs/capys-roles-especificacion.docx).
+Ningún Controller ni View sabe si los productos vienen de una lista fija en memoria o de SQL Server — todos dependen únicamente de la interfaz `IProductoRepository`. Hoy está registrada en `Program.cs` la implementación `MockProductoRepository` (datos fijos). Cuando la base de datos esté lista:
 
-## Acceso a datos
+1. Crear `Services/EfProductoRepository.cs` implementando la misma interfaz, usando el `DbContext`.
+2. Cambiar **una sola línea** en `Program.cs`:
+   ```csharp
+   builder.Services.AddSingleton<IProductoRepository, MockProductoRepository>();
+   // se cambia por:
+   builder.Services.AddScoped<IProductoRepository, EfProductoRepository>();
+   ```
+3. Ningún Controller ni View se toca.
 
-El equipo decide en Sprint 0 entre **Entity Framework Core 10** o **Repository + Stored Procedures**. Cualquiera de las dos convive bien con SQL Server; lo importante es que todo el equipo use el mismo enfoque para no mezclar estilos dentro del mismo proyecto.
+Este mismo patrón (Repository) se debe repetir para Pedidos, Usuarios, etc. conforme se conecte la base de datos — es la práctica que evita tener que reescribir la aplicación cuando pasamos de datos falsos a datos reales.
+
+## Carrito y Checkout: por qué viven en JavaScript / localStorage
+
+Como se definió en la especificación de roles, el carrito debe funcionar **sin necesidad de cuenta**. Por eso:
+
+- `wwwroot/js/carrito.js` — guarda/lee el carrito en `localStorage` del navegador (nada en el servidor).
+- `wwwroot/js/checkout.js` — arma el mensaje del pedido y el link `https://wa.me/...`, y guarda una copia del pedido en `localStorage` para mostrarla en la pantalla de Confirmación.
+- El número de WhatsApp está momentáneamente fijo en `checkout.js` (`NUMERO_WHATSAPP`) — hay un `TODO` marcado para moverlo a configuración real cuando exista el panel del Dueño conectado a base de datos.
+- La validación de "¿tiene sesión iniciada?" antes de mostrar el formulario de datos del cliente está marcada como `TODO` en `CheckoutController.DatosCliente()` — se activa en Sprint 1 cuando se conecte ASP.NET Core Identity.
+
+## Pendiente (depende de la base de datos)
+
+- Login/registro real (ASP.NET Core Identity).
+- Guardar pedidos de forma permanente (hoy solo existen en `localStorage` del navegador de quien compra).
+- Panel de Administrador y Dueño con datos reales (`AdminController`, `DuenoController` — aún no creados).
+- Reemplazar `MockProductoRepository` por la versión con Entity Framework Core.
+
+## Cómo correrlo
+
+```bash
+cd src/CapysBakery.Web
+dotnet restore
+dotnet run
+```
