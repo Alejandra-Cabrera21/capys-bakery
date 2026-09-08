@@ -49,16 +49,10 @@ capys-bakery/
 ├── design/
 │   └── mockups/            → Mockups HTML y capturas de las 8 pantallas del sitio
 ├── database/                → Diagrama entidad-relación y notas del esquema (documentación, no código)
-└── src/
-    └── CapysBakery.Web/     → Proyecto ASP.NET Core MVC
-        ├── Controllers/     → Un controlador por módulo (ver Controllers/README.md)
-        ├── Views/           → Vistas Razor, una carpeta por módulo
-        ├── Models/          → Clases de datos y ViewModels
-        ├── Data/            → DbContext (Entity Framework Core) y conexión a SQL Server
-        └── wwwroot/         → CSS, JS e imágenes estáticas
+└── src/                      → Vacía por ahora — ver src/README.md para el plan de módulos
 ```
 
-> El archivo de proyecto (`.csproj`) y la solución (`.sln`) se generan al iniciar Sprint 0 con `dotnet new mvc`; aún no están incluidos porque este scaffold es solo estructura y documentación, sin código.
+> `src/` está vacía a propósito: el proyecto ASP.NET Core MVC (`CapysBakery.Web`) se genera ahí mismo desde Visual Studio (`File → New Project`), no se pre-crea a mano. `src/README.md` documenta qué controlador/módulo le toca a cada integrante, para que quede claro apenas exista el proyecto real.
 
 ## Cronograma
 
