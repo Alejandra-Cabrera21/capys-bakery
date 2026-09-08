@@ -427,3 +427,6 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+# ASP.NET Core - configuración local de cada desarrollador
+**/appsettings.Development.json
