@@ -1,20 +1,20 @@
-﻿@model List<Producto>
+@model List<Producto>
 @{
     ViewData["Title"] = "Inicio";
 }
 
 <section class="cb-hero">
     <div class="cb-hero-copy">
-        <span class="eyebrow">ÔÇö hecho con cari├▒o, horneado con calma ÔÇö</span>
+        <span class="eyebrow">— hecho con cariño, horneado con calma —</span>
         <h1>Dulces momentos,<br />hechos a mano.</h1>
-        <p>Tartaletas, pies y pasteles artesanales horneados en peque├▒os lotes, con ingredientes reales y mucho tiempo de cari├▒o. Cada pedido es ├║nico, como cada celebraci├│n.</p>
+        <p>Tartaletas, pies y pasteles artesanales horneados en pequeños lotes, con ingredientes reales y mucho tiempo de cariño. Cada pedido es único, como cada celebración.</p>
         <div class="cb-hero-btns">
-            <a asp-controller="Catalogo" asp-action="Index" class="btn cb-btn-plum">Ver el men├║</a>
+            <a asp-controller="Catalogo" asp-action="Index" class="btn cb-btn-plum">Ver el menú</a>
             <a asp-controller="Nosotros" asp-action="Index" class="btn cb-btn-outline">Nuestra historia</a>
         </div>
         <div class="cb-hero-stats">
             <div><div class="n">500+</div><div class="l">Pedidos entregados</div></div>
-            <div><div class="n">4.9Ôÿà</div><div class="l">Calificaci├│n de clientes</div></div>
+            <div><div class="n">4.9★</div><div class="l">Calificación de clientes</div></div>
             <div><div class="n">100%</div><div class="l">Ingredientes reales</div></div>
         </div>
     </div>
@@ -22,7 +22,7 @@
         <div class="cb-hero-img">
             <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1"><ellipse cx="12" cy="16" rx="9" ry="3"/><path d="M3 16V9a9 3 0 0 1 18 0v7"/><path d="M7 9c0-2 1-4 5-4s5 2 5 4"/></svg>
         </div>
-        <div class="cb-seal">hecho a<br />mano Ô£ª<br />Capys</div>
+        <div class="cb-seal">hecho a<br />mano ✦<br />Capys</div>
     </div>
 </section>
 
@@ -31,8 +31,8 @@
 <section class="cb-section">
     <div class="cb-section-head">
         <span class="eyebrow">nuestros favoritos</span>
-        <h2>Lo m├ís pedido esta semana</h2>
-        <p>Una probadita de lo que sale de nuestro horno todos los d├¡as.</p>
+        <h2>Lo más pedido esta semana</h2>
+        <p>Una probadita de lo que sale de nuestro horno todos los días.</p>
     </div>
 
     <div class="cb-grid-4">
@@ -70,7 +70,7 @@
                 {
                     <a asp-controller="Catalogo" asp-action="Detalle" asp-route-id="@promo.Id" class="cb-product-card">
                         <div class="cb-product-img" style="background:linear-gradient(135deg,#F0C9A0,#7C2B3B); position:relative;">
-                            <span style="position:absolute; top:10px; left:10px; background:var(--plum); color:#fff; font-size:10px; font-weight:700; padding:4px 10px; border-radius:14px;">Promoci├│n</span>
+                            <span style="position:absolute; top:10px; left:10px; background:var(--plum); color:#fff; font-size:10px; font-weight:700; padding:4px 10px; border-radius:14px;">Promoción</span>
                         </div>
                         <div class="cb-product-body">
                             <div class="cb-product-tag">@promo.CategoriaPrincipal</div>
@@ -97,8 +97,8 @@
             <div class="cb-story-copy">
                 <span class="eyebrow">nuestra historia</span>
                 <h2>De la cocina de casa<br />a tu mesa</h2>
-                <p>Capys Bakery naci├│ entre pruebas, errores y hornadas de madrugada en una cocina peque├▒a, con la idea simple de compartir postres que supieran como los de casa. Hoy seguimos horneando lote por lote, sin atajos, para que cada bocado se sienta hecho especialmente para ti.</p>
-                <a href="#" class="btn cb-btn-plum">Conoce m├ís de nosotros</a>
+                <p>Capys Bakery nació entre pruebas, errores y hornadas de madrugada en una cocina pequeña, con la idea simple de compartir postres que supieran como los de casa. Hoy seguimos horneando lote por lote, sin atajos, para que cada bocado se sienta hecho especialmente para ti.</p>
+                <a href="#" class="btn cb-btn-plum">Conoce más de nosotros</a>
             </div>
         </div>
     </div>
@@ -111,27 +111,27 @@
     </div>
     <div class="cb-testi-row">
         <div class="cb-testi-card">
-            <div class="cb-stars">ÔÿàÔÿàÔÿàÔÿàÔÿà</div>
-            <p>"El pastel de chocolate para el cumplea├▒os de mi hija fue el favorito de todos. Se nota que est├í hecho con calma y cari├▒o."</p>
+            <div class="cb-stars">★★★★★</div>
+            <p>"El pastel de chocolate para el cumpleaños de mi hija fue el favorito de todos. Se nota que está hecho con calma y cariño."</p>
             <div class="cb-testi-who">
                 <div class="cb-testi-avatar"></div>
-                <div><div class="cb-testi-name">Mar├¡a Jos├® R.</div><div class="cb-testi-role">Cliente frecuente</div></div>
+                <div><div class="cb-testi-name">María José R.</div><div class="cb-testi-role">Cliente frecuente</div></div>
             </div>
         </div>
         <div class="cb-testi-card">
-            <div class="cb-stars">ÔÿàÔÿàÔÿàÔÿàÔÿà</div>
-            <p>"Ped├¡ el catering para mi boda y super├│ todas mis expectativas. Cada mesa preguntaba de d├│nde eran los postres."</p>
+            <div class="cb-stars">★★★★★</div>
+            <p>"Pedí el catering para mi boda y superó todas mis expectativas. Cada mesa preguntaba de dónde eran los postres."</p>
             <div class="cb-testi-who">
                 <div class="cb-testi-avatar"></div>
-                <div><div class="cb-testi-name">Andr├®s F.</div><div class="cb-testi-role">Evento privado</div></div>
+                <div><div class="cb-testi-name">Andrés F.</div><div class="cb-testi-role">Evento privado</div></div>
             </div>
         </div>
         <div class="cb-testi-card">
-            <div class="cb-stars">ÔÿàÔÿàÔÿàÔÿàÔÿà</div>
+            <div class="cb-stars">★★★★★</div>
             <p>"Las mermeladas son mi pedido fijo cada mes. Se nota la diferencia con las industriales, saben a fruta de verdad."</p>
             <div class="cb-testi-who">
                 <div class="cb-testi-avatar"></div>
-                <div><div class="cb-testi-name">Luc├¡a M.</div><div class="cb-testi-role">Cliente frecuente</div></div>
+                <div><div class="cb-testi-name">Lucía M.</div><div class="cb-testi-role">Cliente frecuente</div></div>
             </div>
         </div>
     </div>
@@ -140,10 +140,10 @@
 <div class="cb-newsletter">
     <div>
         <h3>No te pierdas ninguna hornada</h3>
-        <p>Suscr├¡bete y recibe primero los sabores de temporada y promociones especiales.</p>
+        <p>Suscríbete y recibe primero los sabores de temporada y promociones especiales.</p>
     </div>
     <form class="cb-newsletter-form" method="post" action="#">
-        <input type="email" name="correo" placeholder="Tu correo electr├│nico" required />
+        <input type="email" name="correo" placeholder="Tu correo electrónico" required />
         <button type="submit" class="btn cb-btn-plum">Suscribirme</button>
     </form>
 </div>

@@ -1,18 +1,18 @@
-﻿@model List<Producto>
+@model List<Producto>
 @{
-    ViewData["Title"] = "Men├║";
+    ViewData["Title"] = "Menú";
     string? categoriaSeleccionada = ViewBag.CategoriaSeleccionada;
 }
 
 <div class="cb-catalog-hero">
-    <span class="eyebrow">nuestro men├║</span>
+    <span class="eyebrow">nuestro menú</span>
     <h1>Todo lo que horneamos</h1>
-    <p>Tartaletas, pies, pasteles y mermeladas ÔÇö filtra por categor├¡a para encontrar tu antojo.</p>
+    <p>Tartaletas, pies, pasteles y mermeladas — filtra por categoría para encontrar tu antojo.</p>
 </div>
 
 <div class="cb-catalog-layout">
     <aside class="cb-filters">
-        <h5>Categor├¡a</h5>
+        <h5>Categoría</h5>
         <a asp-action="Index" class="cb-filter-chip @(categoriaSeleccionada == null ? "active" : "")">Todos</a>
         @{
             var categorias = ViewBag.Categorias as List<Categoria> ?? new();

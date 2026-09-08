@@ -1,4 +1,4 @@
-﻿@model Producto
+@model Producto
 @{
     ViewData["Title"] = Model.Nombre;
 }
@@ -17,7 +17,7 @@
             @if (Model.Presentaciones.Count > 1)
             {
                 <div class="cb-config-block">
-                    <h4>Tama├▒o / presentaci├│n</h4>
+                    <h4>Tamaño / presentación</h4>
                     <div class="cb-size-options" data-config="tamano">
                         @for (int i = 0; i < Model.Presentaciones.Count; i++)
                         {
@@ -34,9 +34,9 @@
             }
             else if (Model.Presentaciones.Count == 1)
             {
-                // Un producto con una sola presentaci├│n no necesita
-                // selector ÔÇö solo se muestra el precio directo, tal como
-                // documenta el an├ílisis funcional de productos. El bot├│n
+                // Un producto con una sola presentación no necesita
+                // selector — solo se muestra el precio directo, tal como
+                // documenta el análisis funcional de productos. El botón
                 // sigue existiendo (oculto) para que configurador.js
                 // encuentre el mismo data-presentacion-id al armar el carrito.
                 var unica = Model.Presentaciones[0];
@@ -48,7 +48,7 @@
             @if (Model.CategoriaPrincipal == "Pastel" || Model.CategoriaPrincipal == "Pasteles")
             {
                 <div class="cb-config-block">
-                    <h4>Color de decoraci├│n</h4>
+                    <h4>Color de decoración</h4>
                     <div class="cb-swatch-row" data-config="color">
                         <button type="button" class="cb-swatch active" data-valor="Ciruela" style="background:#7C2B3B;"></button>
                         <button type="button" class="cb-swatch" data-valor="Dorado" style="background:#C9982E;"></button>
@@ -71,11 +71,11 @@
             @if (Model.Alergenos.Any())
             {
                 <div class="cb-config-block">
-                    <h4>Al├®rgenos</h4>
+                    <h4>Alérgenos</h4>
                     <div class="cb-allergen-row">
                         @foreach (var alergeno in Model.Alergenos)
                         {
-                            <span class="cb-allergen-chip">ÔÜá @alergeno.Nombre</span>
+                            <span class="cb-allergen-chip">⚠ @alergeno.Nombre</span>
                         }
                     </div>
                 </div>
@@ -84,14 +84,14 @@
             <div class="cb-qty-row">
                 <h4 style="margin:0;">Cantidad</h4>
                 <div class="cb-qty-box">
-                    <button type="button" class="cb-qty-minus">ÔêÆ</button>
+                    <button type="button" class="cb-qty-minus">−</button>
                     <span class="cb-qty-value">1</span>
                     <button type="button" class="cb-qty-plus">+</button>
                 </div>
             </div>
 
             <div class="cb-pd-btns">
-                <button type="button" class="btn cb-btn-outline" id="btn-agregar-favoritos" data-producto-id="@Model.Id">ÔÖí Agregar a favoritos</button>
+                <button type="button" class="btn cb-btn-outline" id="btn-agregar-favoritos" data-producto-id="@Model.Id">♡ Agregar a favoritos</button>
                 <button type="submit" class="btn cb-btn-plum" id="btn-agregar-carrito">Agregar al carrito</button>
             </div>
         </form>
