@@ -29,9 +29,9 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-// Dropdowns del nav ("Panel", "Mi cuenta"): clic para abrir/cerrar. En
-// mobile no hacen nada (ver CSS: ahí quedan siempre expandidos como lista
-// plana dentro del menú hamburguesa).
+// Dropdowns del nav ("Panel", "Mi cuenta"): clic para abrir/cerrar. Ya
+// funciona igual en mobile (acordeón: cerrado por defecto, se abre al
+// tocarlo) y en computadora (flotante) — la única diferencia es el CSS.
 document.addEventListener("DOMContentLoaded", () => {
     const dropdowns = document.querySelectorAll(".cb-nav-dropdown");
     if (!dropdowns.length) return;

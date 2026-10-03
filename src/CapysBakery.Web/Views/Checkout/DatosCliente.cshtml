@@ -35,7 +35,14 @@
 
         <div class="cb-cf-line">
             <label for="direccion">Dirección de entrega</label>
+            @* Si el cliente elige "Recoger", checkout.js rellena este campo
+               con la dirección del negocio y lo bloquea (no hay nada que
+               entregar, se recoge ahí mismo). Al volver a "Envío" se limpia
+               y vuelve a ser editable. *@
             <input type="text" id="direccion" name="direccion" class="cb-form-input" placeholder="Ej. Zona 14, Ciudad de Guatemala" />
+            <p class="cb-hint-text" id="cb-hint-direccion-recoger" style="display:none; margin-top:6px;">
+                📍 Recogerás tu pedido en nuestra ubicación: <a href="https://maps.google.com/?q=Zona+6,+14+avenida+A,+Ciudad+de+Guatemala" target="_blank" rel="noopener">Zona 6, 14 avenida A, Ciudad de Guatemala</a>.
+            </p>
         </div>
 
         <div class="cb-cf-line">
@@ -72,7 +79,14 @@
 
         <div class="cb-cf-line">
             <label for="fecha">Fecha de entrega</label>
-            <input type="date" id="fecha" name="fecha" class="cb-form-input" required />
+            @* Se reemplazó el <input type="date"> nativo por un calendario
+               (flatpickr): con el input nativo, escribir los números hacía
+               que el navegador saltara de segmento (día/mes/año) antes de
+               poder terminar de escribir, ej. al querer poner el día 30.
+               Con flatpickr, el cliente elige la fecha del calendario en
+               vez de escribirla, y de una vez se bloquea "hoy" — la
+               entrega mínima es mañana (ver cb-fecha-min-manana abajo). *@
+            <input type="text" id="fecha" name="fecha" class="cb-form-input" placeholder="Selecciona una fecha" readonly required />
         </div>
 
         <div class="cb-cf-line">
@@ -85,7 +99,7 @@
         <div class="cb-cf-summary-card">
             <h4 style="margin-bottom:18px;">Resumen del pedido</h4>
             <div id="cb-checkout-items"><!-- llenado por checkout.js desde localStorage --></div>
-            <div class="cb-summary-row"><span>Envío (si aplica)</span><span>Q35.00</span></div>
+            <div class="cb-summary-row"><span>Envío (si aplica)</span><span id="cb-checkout-envio">Q35.00</span></div>
             <div class="cb-summary-row total"><span>Total estimado</span><span id="cb-checkout-total">Q0.00</span></div>
 
             <div class="cb-wa-note">
@@ -102,12 +116,33 @@
 </div>
 
 @section Scripts {
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/es.js"></script>
     <script>
         // Correo de la cuenta con sesión iniciada. checkout.js lo guarda
         // dentro del pedido para que "Mis pedidos" (Cuenta/MisPedidos) pueda
         // filtrar solo los pedidos de este comprador. [Authorize] en
         // CheckoutController garantiza que siempre hay sesión al llegar aquí.
         window.CAPYS_USUARIO_CORREO = @Html.Raw(Json.Serialize(ViewBag.CorreoUsuario));
+    </script>
+    <script>
+        // Calendario de "Fecha de entrega": no se puede escribir a mano (el
+        // input queda readonly), y la fecha más próxima que se puede elegir
+        // es MAÑANA — hoy mismo no es una opción válida de entrega.
+        document.addEventListener('DOMContentLoaded', () => {
+            const manana = new Date();
+            manana.setDate(manana.getDate() + 1);
+
+            flatpickr("#fecha", {
+                locale: "es",
+                dateFormat: "Y-m-d",      // lo que recibe el servidor (igual que antes con <input type="date">)
+                altInput: true,           // el cliente ve un formato legible...
+                altFormat: "d/m/Y",       // ...mientras el valor real enviado sigue siendo Y-m-d
+                minDate: manana,          // bloquea hoy y cualquier fecha pasada
+                disableMobile: true,      // usa el mismo calendario también en celular
+            });
+        });
     </script>
     <script src="~/js/checkout.js" asp-append-version="true"></script>
     <script>

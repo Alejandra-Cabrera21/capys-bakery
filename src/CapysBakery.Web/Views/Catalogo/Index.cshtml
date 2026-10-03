@@ -31,7 +31,14 @@
             @foreach (var producto in Model)
             {
                 <a asp-action="Detalle" asp-route-id="@producto.Id" class="cb-product-card">
-                    <div class="cb-product-img" style="background:linear-gradient(135deg,#F2D6C9,#E8B876);"></div>
+                    @if (!string.IsNullOrEmpty(producto.ImagenUrl))
+                    {
+                        <div class="cb-product-img" style="background-image:url('@producto.ImagenUrl'); background-size:cover; background-position:center;"></div>
+                    }
+                    else
+                    {
+                        <div class="cb-product-img" style="background:linear-gradient(135deg,#F2D6C9,#E8B876);"></div>
+                    }
                     <div class="cb-product-body">
                         <div class="cb-product-tag">@producto.CategoriaPrincipal</div>
                         <div class="cb-product-name">@producto.Nombre</div>

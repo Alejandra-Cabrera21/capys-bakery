@@ -1,0 +1,60 @@
+@model List<CapysBakery.Web.Models.CalificacionPedido>
+@{
+    ViewData["Title"] = "Testimonios";
+    var destacados = Model.Count(c => c.Destacado);
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Testimonios</h1>
+    <p>
+        Elige qué calificaciones (con comentario) se muestran como testimonios reales en el Home.
+        @if (destacados > 0)
+        {
+            <text> — <b>@destacados destacado@(destacados == 1 ? "" : "s")</b> ahora mismo.</text>
+        }
+    </p>
+</div>
+
+<div class="cb-admin-layout" style="max-width:760px;">
+    @if (!Model.Any())
+    {
+        <p class="cb-admin-sub" style="text-align:center; padding:40px 0;">
+            Todavía no hay ninguna calificación con comentario escrito.
+        </p>
+    }
+    else
+    {
+        @foreach (var calificacion in Model)
+        {
+            <div class="cb-pedido-card" style="margin-bottom:14px; @(calificacion.Destacado ? "border-left:3px solid var(--plum);" : "")">
+                <div class="cb-pedido-card-top">
+                    <b style="font-size:14px;">@(calificacion.Pedido?.NombreCliente ?? "Cliente")</b>
+                    <span class="cb-admin-sub">@calificacion.FechaCalificacion.ToString("d MMM yyyy")</span>
+                </div>
+                <div style="color:#C9982E; letter-spacing:2px; margin:6px 0;">
+                    @(new string('★', calificacion.Estrellas))@(new string('☆', 5 - calificacion.Estrellas))
+                </div>
+                <p style="font-size:13.5px; color:var(--ink); margin-bottom:10px;">"@calificacion.Comentario"</p>
+
+                <form asp-controller="AdminTestimonios" asp-action="CambiarDestacado" method="post">
+                    <input type="hidden" name="id" value="@calificacion.Id" />
+                    @* OJO: NO poner un bool "pelado" como value de un atributo
+                       (ej. value="@(!calificacion.Destacado)") — Razor trata
+                       cualquier atributo cuyo valor sea una expresión bool
+                       completa como atributo booleano HTML: si da true
+                       imprime value="value" (literal), y si da false OMITE
+                       el atributo por completo. En ambos casos el servidor
+                       nunca recibe "true"/"false" de verdad, bool.TryParse
+                       falla, y el binder cae siempre a false — por eso
+                       "Destacar en el Home" nunca cambiaba nada. Se fuerza
+                       el string explícito con el ternario de abajo (mismo
+                       arreglo que ya se usó para data-multiple en Detalle.cshtml). *@
+                    <input type="hidden" name="destacado" value="@(!calificacion.Destacado ? "true" : "false")" />
+                    <button type="submit" class="btn @(calificacion.Destacado ? "cb-btn-outline" : "cb-btn-plum")">
+                        @(calificacion.Destacado ? "Quitar del Home" : "Destacar en el Home")
+                    </button>
+                </form>
+            </div>
+        }
+    }
+</div>
