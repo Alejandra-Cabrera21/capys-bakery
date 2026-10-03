@@ -193,6 +193,28 @@ public class CuentaController : Controller
         return View(pedidos);
     }
 
+    // POST /Cuenta/Calificar — el cliente califica un pedido ya
+    // "Entregado" desde /Cuenta/MisPedidos (1 a 5 estrellas + comentario
+    // opcional). Se vuelve a comprobar aquí que el pedido sea del usuario
+    // con sesión iniciada — nunca se confía a ciegas en el pedidoId que
+    // manda el formulario.
+    [HttpPost]
+    [Authorize]
+    [ValidateAntiForgeryToken]
+    public IActionResult Calificar(int pedidoId, int estrellas, string? comentario)
+    {
+        var usuarioId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+        var pedido = _pedidoRepository.ObtenerPorId(pedidoId);
+
+        if (pedido is null || pedido.UsuarioId != usuarioId)
+        {
+            return NotFound();
+        }
+
+        _pedidoRepository.Calificar(pedidoId, estrellas, comentario);
+        return RedirectToAction(nameof(MisPedidos));
+    }
+
     // GET /Cuenta/MisFavoritos — productos que el comprador marcó con el
     // corazón desde la página de detalle (ver configurador.js). Igual que
     // los favoritos se guardan solo como una lista de ids en localStorage

@@ -1,6 +1,8 @@
 // configurador.js — Lógica de la página de detalle de producto:
 // selección de tamaño/presentación (cada una con su propio precio),
-// color, toppings, cantidad, y agregar al carrito.
+// personalizaciones (color, topping, etc. — ahora con precio adicional
+// real, cargado desde producto_opcion_personalizacion), cantidad, y
+// agregar al carrito.
 
 document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("form-agregar-carrito");
@@ -37,9 +39,31 @@ document.addEventListener("DOMContentLoaded", () => {
 
     actualizarBotonFavoritos();
 
+    // --- personalizaciones (color, topping, etc.) ---
+    // Cada grupo viene marcado con data-config="personalizacion-N" (ver
+    // Catalogo/Detalle.cshtml) y data-multiple="true"/"false" según si el
+    // cliente puede elegir una sola opción (ej. Decoración) o varias
+    // (ej. Topping). Cada botón trae su propio recargo en data-precio.
+    function obtenerPersonalizacionesSeleccionadas() {
+        const seleccionadas = [];
+        form.querySelectorAll('[data-config^="personalizacion-"]').forEach(grupo => {
+            grupo.querySelectorAll(".cb-chip.active").forEach(chip => {
+                seleccionadas.push({
+                    opcionId: parseInt(chip.dataset.opcionId, 10),
+                    nombre: chip.dataset.valor,
+                    precioAdicional: parseFloat(chip.dataset.precio) || 0,
+                });
+            });
+        });
+        return seleccionadas;
+    }
+
     function precioSeleccionado() {
         const activo = form.querySelector('[data-config="tamano"] .active');
-        return activo ? parseFloat(activo.dataset.precio) : 0;
+        const precioBase = activo ? parseFloat(activo.dataset.precio) : 0;
+        const extra = obtenerPersonalizacionesSeleccionadas()
+            .reduce((suma, p) => suma + p.precioAdicional, 0);
+        return precioBase + extra;
     }
 
     function actualizarPrecioMostrado() {
@@ -57,16 +81,17 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // --- chips de selección única (color) y múltiple (toppings) ---
+    // --- chips de selección única o múltiple (personalizaciones) ---
     form.querySelectorAll("[data-config]").forEach(grupo => {
         if (grupo.classList.contains("cb-size-options")) return; // ya manejado arriba
         const multiple = grupo.dataset.multiple === "true";
-        grupo.querySelectorAll(".cb-chip, .cb-swatch").forEach(boton => {
+        grupo.querySelectorAll(".cb-chip").forEach(boton => {
             boton.addEventListener("click", () => {
                 if (!multiple) {
                     grupo.querySelectorAll(".active").forEach(b => b.classList.remove("active"));
                 }
                 boton.classList.toggle("active");
+                actualizarPrecioMostrado();
             });
         });
     });
@@ -89,17 +114,18 @@ document.addEventListener("DOMContentLoaded", () => {
 
         const tamanoBtn = form.querySelector('[data-config="tamano"] .active');
         const tamano = tamanoBtn?.dataset.valor ?? null;
-        const precio = precioSeleccionado();
-        const color = form.querySelector('[data-config="color"] .active')?.dataset.valor ?? null;
-        const toppings = Array.from(form.querySelectorAll('[data-config="toppings"] .active')).map(b => b.dataset.valor);
+        const personalizaciones = obtenerPersonalizacionesSeleccionadas();
+        const precio = precioSeleccionado(); // precio base + recargo de personalizaciones ya sumado
 
         const item = {
             id: form.dataset.productoId,
             presentacionId: tamanoBtn?.dataset.presentacionId ? parseInt(tamanoBtn.dataset.presentacionId, 10) : null,
             nombre: form.dataset.productoNombre,
+            imagenUrl: form.dataset.productoImagen || null,
             precio: precio,
             cantidad: parseInt(qtyValue.textContent, 10),
-            opciones: { tamano, color, toppings },
+            opciones: { tamano },
+            personalizaciones, // [{ opcionId, nombre, precioAdicional }, ...]
         };
 
         CapysCarrito.agregarProducto(item);

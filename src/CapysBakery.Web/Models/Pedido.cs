@@ -38,6 +38,11 @@ public class Pedido
     public List<PedidoDetalle> Detalles { get; set; } = new();
     public List<HistorialEstadoPedido> Historial { get; set; } = new();
 
+    // Solo existe una vez que el cliente calificó el pedido desde
+    // /Cuenta/MisPedidos (y solo puede calificarlo cuando el pedido ya
+    // está "Entregado"). Null mientras no lo haya calificado.
+    public CalificacionPedido? Calificacion { get; set; }
+
     // Conveniencia (NO se guarda como columna): el diseño de BD documenta
     // explícitamente que el total NO se persiste — se calcula a partir de
     // pedido_detalle (sección 7 del documento de diseño).

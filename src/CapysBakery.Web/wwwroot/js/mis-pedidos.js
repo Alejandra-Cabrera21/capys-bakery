@@ -14,7 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
                 nombre: item.nombre,
                 precio: item.precio,
                 cantidad: item.cantidad,
-                opciones: { tamano: null, color: null, toppings: [] },
+                opciones: { tamano: null },
+                personalizaciones: [],
             }));
             window.location.href = "/Carrito";
         });

@@ -1,5 +1,7 @@
+@using CapysBakery.Web.Models
 @{
     ViewData["Title"] = "Eventos y Catering";
+    var paquetes = ViewBag.Paquetes as List<PaqueteEvento> ?? new();
 }
 
 <div class="cb-catalog-hero" style="text-align:center;">
@@ -10,41 +12,39 @@
 
 <div class="cb-section" style="padding-top:20px;">
     <div class="cb-pkg-row">
-        <div class="cb-pkg-card">
-            <h4>Cumpleaños</h4>
-            <p style="font-size:12.5px; color:var(--ink-soft);">Para reuniones íntimas</p>
-            <div class="cb-pkg-price">Q450<span> / hasta 15 personas</span></div>
-            <div class="cb-pkg-list">
-                <div>✓ Pastel personalizado a elección</div>
-                <div>✓ Mesa de tartaletas variadas</div>
-                <div>✓ Decoración temática básica</div>
+        @if (!paquetes.Any())
+        {
+            <p class="text-muted" style="text-align:center; width:100%;">Todavía no hay paquetes publicados.</p>
+        }
+        @foreach (var paquete in paquetes)
+        {
+            bool destacado = !string.IsNullOrWhiteSpace(paquete.Etiqueta);
+            <div class="cb-pkg-card @(destacado ? "featured" : "")">
+                @if (destacado)
+                {
+                    <div class="cb-pkg-badge">@paquete.Etiqueta</div>
+                }
+                <h4>@paquete.Nombre</h4>
+                @if (!string.IsNullOrWhiteSpace(paquete.Subtitulo))
+                {
+                    <p style="font-size:12.5px; color:var(--ink-soft);">@paquete.Subtitulo</p>
+                }
+                <div class="cb-pkg-price">
+                    Q@(paquete.Precio.ToString("0.##"))
+                    @if (!string.IsNullOrWhiteSpace(paquete.UnidadPrecio))
+                    {
+                        <span> / @paquete.UnidadPrecio</span>
+                    }
+                </div>
+                <div class="cb-pkg-list">
+                    @foreach (var item in paquete.ItemsIncluidos)
+                    {
+                        <div>✓ @item</div>
+                    }
+                </div>
+                <a asp-controller="Contacto" asp-action="Index" class="btn @(destacado ? "cb-btn-plum" : "cb-btn-outline")">Cotizar este paquete</a>
             </div>
-            <a asp-controller="Contacto" asp-action="Index" class="btn cb-btn-outline">Cotizar este paquete</a>
-        </div>
-        <div class="cb-pkg-card featured">
-            <div class="cb-pkg-badge">Más popular</div>
-            <h4>Bodas</h4>
-            <p style="font-size:12.5px; color:var(--ink-soft);">Mesa dulce completa</p>
-            <div class="cb-pkg-price">Q2,800<span> / hasta 80 personas</span></div>
-            <div class="cb-pkg-list">
-                <div>✓ Pastel de bodas de 3 pisos</div>
-                <div>✓ Mesa dulce con 6 variedades</div>
-                <div>✓ Degustación previa incluida</div>
-                <div>✓ Decoración con flores comestibles</div>
-            </div>
-            <a asp-controller="Contacto" asp-action="Index" class="btn cb-btn-plum">Cotizar este paquete</a>
-        </div>
-        <div class="cb-pkg-card">
-            <h4>Corporativo</h4>
-            <p style="font-size:12.5px; color:var(--ink-soft);">Para tu empresa</p>
-            <div class="cb-pkg-price">Q35<span> / persona</span></div>
-            <div class="cb-pkg-list">
-                <div>✓ Postres individuales para llevar</div>
-                <div>✓ Opciones sin azúcar disponibles</div>
-                <div>✓ Entrega puntual en oficina</div>
-            </div>
-            <a asp-controller="Contacto" asp-action="Index" class="btn cb-btn-outline">Cotizar este paquete</a>
-        </div>
+        }
     </div>
 </div>
 
@@ -63,9 +63,27 @@
 <div class="cb-section">
     <div class="cb-section-head"><span class="eyebrow">momentos que hemos endulzado</span><h2>Galería de eventos</h2></div>
     <div class="cb-gallery-grid">
-        <div class="cb-gallery-item" style="background:linear-gradient(135deg,#F2D6C9,#E8B876);"></div>
-        <div class="cb-gallery-item" style="background:linear-gradient(135deg,#E8C99B,#C9982E);"></div>
-        <div class="cb-gallery-item" style="background:linear-gradient(135deg,#D9B48F,#7C2B3B);"></div>
-        <div class="cb-gallery-item" style="background:linear-gradient(135deg,#F0C9A0,#A87A1E);"></div>
+        @{
+            var fondosOriginales = new[]
+            {
+                "background:linear-gradient(135deg,#F2D6C9,#E8B876);",
+                "background:linear-gradient(135deg,#E8C99B,#C9982E);",
+                "background:linear-gradient(135deg,#D9B48F,#7C2B3B);",
+                "background:linear-gradient(135deg,#F0C9A0,#A87A1E);",
+            };
+            var imagenesGaleria = ViewBag.ImagenesGaleria as string?[] ?? new string?[4];
+        }
+        @for (int i = 0; i < 4; i++)
+        {
+            var url = i < imagenesGaleria.Length ? imagenesGaleria[i] : null;
+            if (!string.IsNullOrEmpty(url))
+            {
+                <div class="cb-gallery-item" style="background-image:url('@url'); background-size:cover; background-position:center;"></div>
+            }
+            else
+            {
+                <div class="cb-gallery-item" style="@fondosOriginales[i]"></div>
+            }
+        }
     </div>
 </div>

@@ -1,0 +1,56 @@
+@model List<CapysBakery.Web.Models.MensajeContacto>
+@{
+    ViewData["Title"] = "Mensajes de contacto";
+    var sinLeer = Model.Count(m => !m.Leido);
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Mensajes de contacto</h1>
+    <p>
+        Mensajes enviados desde el formulario público de /Contacto.
+        @if (sinLeer > 0)
+        {
+            <text> — <b>@sinLeer sin leer</b>.</text>
+        }
+    </p>
+</div>
+
+<div class="cb-admin-layout" style="max-width:760px;">
+    @if (!Model.Any())
+    {
+        <p class="cb-admin-sub" style="text-align:center; padding:40px 0;">Todavía no se ha recibido ningún mensaje.</p>
+    }
+    else
+    {
+        @foreach (var mensaje in Model)
+        {
+            <div class="cb-pedido-card" style="margin-bottom:14px; @(mensaje.Leido ? "" : "border-left:3px solid var(--plum);")">
+                <div class="cb-pedido-card-top">
+                    <b style="font-size:14px;">@mensaje.Nombre</b>
+                    <span class="cb-admin-sub">@mensaje.FechaEnvio.ToString("d MMM yyyy, HH:mm")</span>
+                </div>
+                <p class="cb-admin-sub" style="margin:4px 0;">
+                    <a href="mailto:@mensaje.Correo">@mensaje.Correo</a>
+                    @if (!string.IsNullOrEmpty(mensaje.Telefono))
+                    {
+                        <text> · @mensaje.Telefono</text>
+                    }
+                    · @mensaje.TipoConsulta
+                </p>
+                <p style="font-size:13.5px; color:var(--ink); margin-top:8px; white-space:pre-wrap;">@mensaje.Mensaje</p>
+
+                @if (!mensaje.Leido)
+                {
+                    <form asp-controller="AdminMensajes" asp-action="MarcarLeido" method="post" style="margin-top:10px;">
+                        <input type="hidden" name="id" value="@mensaje.Id" />
+                        <button type="submit" class="cb-admin-link-btn">Marcar como leído</button>
+                    </form>
+                }
+                else
+                {
+                    <span class="cb-admin-sub" style="margin-top:10px; display:inline-block;">✓ Leído</span>
+                }
+            </div>
+        }
+    }
+</div>

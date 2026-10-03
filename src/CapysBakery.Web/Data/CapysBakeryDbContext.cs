@@ -43,6 +43,27 @@ public class CapysBakeryDbContext : DbContext
     public DbSet<Publicacion> Publicaciones => Set<Publicacion>();
     public DbSet<ComentarioPublicacion> ComentariosPublicacion => Set<ComentarioPublicacion>();
 
+    // MensajeContacto: tampoco forma parte del diseño original de 18
+    // tablas — es lo que guarda de verdad el formulario de /Contacto
+    // (antes solo mostraba una confirmación visual sin persistir nada).
+    public DbSet<MensajeContacto> MensajesContacto => Set<MensajeContacto>();
+
+    // CalificacionPedido: tampoco forma parte del diseño original de 18
+    // tablas — el cliente califica su pedido (1-5 estrellas) una vez
+    // "Entregado", y el promedio alimenta el Home (reemplaza el "4.9★" fijo).
+    public DbSet<CalificacionPedido> CalificacionesPedido => Set<CalificacionPedido>();
+
+    // ContenidoSitio: tampoco forma parte del diseño original de 18
+    // tablas — almacén "clave -> imagen" para que el Dueño/Administrador
+    // reemplace imágenes de contenido estático sin tocar código.
+    public DbSet<ContenidoSitio> ContenidosSitio => Set<ContenidoSitio>();
+
+    // PaqueteEvento: tampoco forma parte del diseño original de 18 tablas —
+    // las tarjetas de paquetes de /Eventos (Cumpleaños, Bodas, Corporativo)
+    // antes estaban fijas en la vista; ahora el Dueño/Administrador las
+    // administra desde /AdminEventos (agregar, editar, ocultar, eliminar).
+    public DbSet<PaqueteEvento> PaquetesEvento => Set<PaqueteEvento>();
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         // ================= 5.1 Catálogo de productos =================
@@ -74,6 +95,7 @@ public class CapysBakeryDbContext : DbContext
             // la sección 8 del documento de diseño.
             e.Property(p => p.Precio).HasColumnName("precio").HasColumnType("decimal(10,2)");
             e.Property(p => p.EsPromocion).HasColumnName("es_promocion");
+            e.Property(p => p.EsDestacado).HasColumnName("es_destacado");
             e.Property(p => p.CreadoPorCorreo).HasColumnName("creado_por_correo").HasMaxLength(150);
             e.Property(p => p.FechaCreacion).HasColumnName("fecha_creacion");
 
@@ -339,6 +361,75 @@ public class CapysBakeryDbContext : DbContext
 
             e.HasOne<Publicacion>().WithMany().HasForeignKey(c => c.PublicacionId).OnDelete(DeleteBehavior.Cascade);
             e.HasOne(c => c.Usuario).WithMany().HasForeignKey(c => c.UsuarioId).OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // ================= Mensajes de contacto (fuera del diseño original de 18 tablas) =================
+
+        modelBuilder.Entity<MensajeContacto>(e =>
+        {
+            e.ToTable("mensaje_contacto");
+            e.HasKey(m => m.Id);
+            e.Property(m => m.Id).HasColumnName("id_mensaje");
+            e.Property(m => m.Nombre).HasColumnName("nombre").HasMaxLength(150).IsRequired();
+            e.Property(m => m.Correo).HasColumnName("correo").HasMaxLength(150).IsRequired();
+            e.Property(m => m.Telefono).HasColumnName("telefono").HasMaxLength(25);
+            e.Property(m => m.TipoConsulta).HasColumnName("tipo_consulta").HasMaxLength(50);
+            e.Property(m => m.Mensaje).HasColumnName("mensaje").IsRequired();
+            e.Property(m => m.FechaEnvio).HasColumnName("fecha_envio");
+            e.Property(m => m.Leido).HasColumnName("leido");
+        });
+
+        // ================= Calificaciones de pedido (fuera del diseño original de 18 tablas) =================
+
+        modelBuilder.Entity<CalificacionPedido>(e =>
+        {
+            e.ToTable("calificacion_pedido");
+            e.HasKey(c => c.Id);
+            e.Property(c => c.Id).HasColumnName("id_calificacion");
+            e.Property(c => c.PedidoId).HasColumnName("id_pedido");
+            e.Property(c => c.Estrellas).HasColumnName("estrellas").IsRequired();
+            e.Property(c => c.Comentario).HasColumnName("comentario").HasMaxLength(500);
+            e.Property(c => c.FechaCalificacion).HasColumnName("fecha_calificacion");
+            e.Property(c => c.Destacado).HasColumnName("destacado");
+
+            e.HasIndex(c => c.PedidoId).IsUnique(); // una calificación por pedido
+            e.HasOne(c => c.Pedido).WithOne(p => p.Calificacion)
+                .HasForeignKey<CalificacionPedido>(c => c.PedidoId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // ================= Contenido del sitio (fuera del diseño original de 18 tablas) =================
+
+        modelBuilder.Entity<ContenidoSitio>(e =>
+        {
+            e.ToTable("contenido_sitio");
+            e.HasKey(c => c.Id);
+            e.Property(c => c.Id).HasColumnName("id_contenido");
+            e.Property(c => c.Clave).HasColumnName("clave").HasMaxLength(60).IsRequired();
+            e.Property(c => c.UrlImagen).HasColumnName("url_imagen").HasMaxLength(500);
+            e.Property(c => c.FechaActualizacion).HasColumnName("fecha_actualizacion");
+            e.HasIndex(c => c.Clave).IsUnique();
+        });
+
+        // ================= Paquetes de eventos (fuera del diseño original de 18 tablas) =================
+
+        modelBuilder.Entity<PaqueteEvento>(e =>
+        {
+            e.ToTable("paquete_evento");
+            e.HasKey(p => p.Id);
+            e.Property(p => p.Id).HasColumnName("id_paquete_evento");
+            e.Property(p => p.Nombre).HasColumnName("nombre").HasMaxLength(150).IsRequired();
+            e.Property(p => p.Subtitulo).HasColumnName("subtitulo").HasMaxLength(150);
+            e.Property(p => p.Descripcion).HasColumnName("descripcion").HasMaxLength(500).IsRequired();
+            e.Property(p => p.Precio).HasColumnName("precio").HasColumnType("decimal(10,2)");
+            e.Property(p => p.UnidadPrecio).HasColumnName("unidad_precio").HasMaxLength(50);
+            e.Property(p => p.Incluye).HasColumnName("incluye").IsRequired();
+            e.Property(p => p.Etiqueta).HasColumnName("etiqueta").HasMaxLength(50);
+            e.Property(p => p.Orden).HasColumnName("orden");
+            e.Property(p => p.Activo).HasColumnName("activo");
+
+            // Propiedad de conveniencia (no es columna).
+            e.Ignore(p => p.ItemsIncluidos);
         });
     }
 }

@@ -5,6 +5,7 @@
 <div class="cb-catalog-hero">
     <h1 style="font-size:32px;">Tu carrito</h1>
     <p id="cb-cart-count-text">Cargando tu pedido...</p>
+    <a asp-controller="Catalogo" asp-action="Index" style="display:inline-block; margin-top:10px; font-size:13px; color:var(--ink-soft);">← Seguir comprando</a>
 </div>
 
 <div class="cb-cart-layout">
@@ -15,8 +16,8 @@
     <div class="cb-cart-summary">
         <h4 style="margin-bottom:20px;">Resumen del pedido</h4>
         <div class="cb-summary-row"><span>Subtotal</span><span id="cb-subtotal">Q0.00</span></div>
-        <div class="cb-summary-row"><span>Envío (si aplica)</span><span>Q35.00</span></div>
-        <div class="cb-summary-row total"><span>Total estimado</span><span id="cb-total">Q35.00</span></div>
+        <div class="cb-summary-row"><span>Envío (si aplica)</span><span id="cb-envio">Q0.00</span></div>
+        <div class="cb-summary-row total"><span>Total estimado</span><span id="cb-total">Q0.00</span></div>
 
         <a asp-controller="Checkout" asp-action="DatosCliente" class="btn cb-btn-plum" style="text-align:center; margin-top:24px; padding:15px; display:block;">Continuar al formulario</a>
     </div>

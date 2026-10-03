@@ -13,6 +13,11 @@ const CapysCheckout = (() => {
     const CLAVE_PEDIDO_PENDIENTE = "capys_pedido_pendiente";
     const CLAVE_PEDIDOS_ADMIN = "capys_pedidos_admin"; // lista completa, para el panel de Administrador
 
+    // Dirección del negocio: se autocompleta en "Dirección de entrega" cuando
+    // el cliente elige Recoger (el pedido se recoge ahí, no hay que escribir
+    // nada). Mismo texto/ubicación que en el footer (_Layout.cshtml).
+    const DIRECCION_NEGOCIO = "Zona 6, 14 avenida A, Ciudad de Guatemala";
+
     function armarMensajeWhatsApp(datosCliente, carrito, numeroPedido, total) {
         const lineas = [];
         lineas.push("Hola, realicé un pedido desde la página de Capys Bakery.");
@@ -24,6 +29,9 @@ const CapysCheckout = (() => {
         carrito.forEach(item => {
             let linea = `- ${item.cantidad} ${item.nombre}`;
             if (item.opciones?.tamano) linea += ` — ${item.opciones.tamano}`;
+            if (item.personalizaciones?.length) {
+                linea += ` (${item.personalizaciones.map(p => p.nombre).join(", ")})`;
+            }
             linea += ` — Q${(item.precio * item.cantidad).toFixed(2)}`;
             lineas.push(linea);
         });
@@ -68,6 +76,30 @@ const CapysCheckout = (() => {
         if (bloque) bloque.style.display = metodoActivo === "Transferencia bancaria" ? "block" : "none";
     }
 
+    // Cuando el cliente elige "Recoger", no hay nada que entregar en una
+    // dirección — se recoge en el negocio — así que el campo se autocompleta
+    // con esa dirección y se bloquea para edición. Al volver a "Envío" se
+    // limpia y se vuelve a poder escribir, guardando lo que el cliente ya
+    // había escrito antes de cambiar a Recoger (si lo hizo).
+    let direccionEscritaPorCliente = "";
+
+    function actualizarDireccionEntrega(formaEntrega) {
+        const input = document.getElementById("direccion");
+        if (!input) return;
+        const hint = document.getElementById("cb-hint-direccion-recoger");
+
+        const esRecoger = formaEntrega === "Recoger";
+        if (esRecoger) {
+            if (input.value !== DIRECCION_NEGOCIO) direccionEscritaPorCliente = input.value;
+            input.value = DIRECCION_NEGOCIO;
+            input.readOnly = true;
+        } else {
+            input.readOnly = false;
+            if (input.value === DIRECCION_NEGOCIO) input.value = direccionEscritaPorCliente;
+        }
+        if (hint) hint.style.display = esRecoger ? "block" : "none";
+    }
+
     function iniciarFormularioDatosCliente() {
         const carrito = CapysCarrito.obtenerCarrito();
         const contenedor = document.getElementById("cb-checkout-items");
@@ -78,9 +110,20 @@ const CapysCheckout = (() => {
                 .map(item => `<div class="cb-summary-row"><span>${item.nombre} × ${item.cantidad}</span><span>${CapysCarrito.formatearMoneda(item.precio * item.cantidad)}</span></div>`)
                 .join("");
         }
-        if (totalEl) {
-            const total = CapysCarrito.calcularSubtotal(carrito) + CapysCarrito.COSTO_ENVIO;
-            totalEl.textContent = CapysCarrito.formatearMoneda(total);
+
+        const envioEl = document.getElementById("cb-checkout-envio");
+
+        // Recalcula el costo de envío y el total mostrados según la forma
+        // de entrega elegida: "Recoger" no tiene costo de envío, así que
+        // no debe sumarse al total (antes siempre se sumaba Q35.00 fijo,
+        // sin importar la forma de entrega elegida).
+        function actualizarTotalConEnvio(formaEntrega) {
+            const costoEnvio = formaEntrega === "Recoger" ? 0 : CapysCarrito.COSTO_ENVIO;
+            if (envioEl) envioEl.textContent = CapysCarrito.formatearMoneda(costoEnvio);
+            if (totalEl) {
+                const total = CapysCarrito.calcularSubtotal(carrito) + costoEnvio;
+                totalEl.textContent = CapysCarrito.formatearMoneda(total);
+            }
         }
 
         // Nota: los datos bancarios ya no se inyectan aquí por JS — desde
@@ -93,6 +136,8 @@ const CapysCheckout = (() => {
                 document.querySelectorAll('[data-config="entrega"] .cb-toggle').forEach(b => b.classList.remove("active"));
                 boton.classList.add("active");
                 actualizarOpcionesDePago(boton.dataset.valor);
+                actualizarDireccionEntrega(boton.dataset.valor);
+                actualizarTotalConEnvio(boton.dataset.valor);
             });
         });
 
@@ -108,6 +153,8 @@ const CapysCheckout = (() => {
 
         const entregaActual = document.querySelector('[data-config="entrega"] .active')?.dataset.valor ?? "Envío";
         actualizarOpcionesDePago(entregaActual);
+        actualizarDireccionEntrega(entregaActual);
+        actualizarTotalConEnvio(entregaActual);
 
         const form = document.getElementById("form-datos-cliente");
         form?.addEventListener("submit", async e => {
@@ -164,6 +211,15 @@ const CapysCheckout = (() => {
                             nombre: item.nombre,
                             precio: item.precio,
                             cantidad: item.cantidad,
+                            // Personalizaciones elegidas para esta línea (color,
+                            // topping, etc.) — antes esto nunca se mandaba al
+                            // servidor, así que el pedido guardado perdía por
+                            // completo esa información. Ahora sí queda en
+                            // pedido_detalle_personalizacion (ver CheckoutController.Confirmar).
+                            personalizaciones: (item.personalizaciones || []).map(p => ({
+                                productoOpcionId: p.opcionId,
+                                precioAdicionalUnitario: p.precioAdicional,
+                            })),
                         })),
                     }),
                 });
