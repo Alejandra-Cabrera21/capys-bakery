@@ -13,6 +13,12 @@ public class Producto
 
     public bool EsPromocion { get; set; }
 
+    // Controla si el producto aparece en "Lo más pedido esta semana" del
+    // Home — el Dueño/Administrador lo marca desde el panel para poder
+    // cambiar la selección cada semana, en vez de que salgan los primeros
+    // 4 productos de la base de datos sin ningún criterio real.
+    public bool EsDestacado { get; set; }
+
     // Permite ocultar el producto del catálogo público sin borrarlo,
     // tal como se documentó en el diseño de base de datos (columna
     // "disponible" de la tabla producto).

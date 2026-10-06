@@ -1,19 +1,65 @@
 @model Producto
 @{
     ViewData["Title"] = Model.Nombre;
+
+    // Opciones de personalización habilitadas para ESTE producto (ver
+    // AdminProductos/Formulario "Personalizaciones disponibles"),
+    // agrupadas por tipo (Decoración, Topping, ...). Antes esto eran
+    // botones de color/topping fijos en el HTML, sin precio ni conexión a
+    // la base de datos, y solo aparecían si la categoría era "Pastel".
+    // Ahora salen solo si el admin de verdad las asignó a este producto.
+    var gruposPersonalizacion = Model.OpcionesPersonalizacion
+        .Where(o => o.Disponible && o.Opcion is not null)
+        .OrderBy(o => o.Opcion!.TipoPersonalizacionId)
+        .GroupBy(o => o.Opcion!.TipoPersonalizacion?.Nombre ?? "Personalización")
+        .ToList();
 }
+
+<div style="max-width:1400px; margin:0 auto; padding:24px 56px 0 56px;">
+    <a asp-controller="Catalogo" asp-action="Index" style="color:var(--ink-soft); font-size:13.5px; text-decoration:none;">
+        ← Volver al menú
+    </a>
+</div>
 
 <div class="cb-pd-layout">
     <div class="cb-pd-gallery">
-        <div class="cb-pd-main-img"><svg width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="#7C2B3B" stroke-width="1"><ellipse cx="12" cy="9" rx="7" ry="5"/><path d="M5 9v6a7 3 0 0 0 14 0V9"/></svg></div>
+        @if (Model.Imagenes.Any())
+        {
+            var imagenes = Model.Imagenes.OrderByDescending(i => i.EsPrincipal).ThenBy(i => i.Orden).ToList();
+            <div class="cb-pd-carousel" data-carousel>
+                <div class="cb-pd-carousel-track">
+                    @foreach (var img in imagenes)
+                    {
+                        <div class="cb-pd-carousel-slide">
+                            <img src="@img.UrlImagen" alt="@Model.Nombre" />
+                        </div>
+                    }
+                </div>
+                @if (imagenes.Count > 1)
+                {
+                    <button type="button" class="cb-pd-carousel-arrow cb-pd-carousel-prev" aria-label="Imagen anterior">‹</button>
+                    <button type="button" class="cb-pd-carousel-arrow cb-pd-carousel-next" aria-label="Siguiente imagen">›</button>
+                    <div class="cb-pd-carousel-dots">
+                        @for (int i = 0; i < imagenes.Count; i++)
+                        {
+                            <button type="button" class="cb-pd-carousel-dot @(i == 0 ? "active" : "")" data-index="@i" aria-label="Imagen @(i + 1)"></button>
+                        }
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="cb-pd-main-img"><svg width="90" height="90" viewBox="0 0 24 24" fill="none" stroke="#7C2B3B" stroke-width="1"><ellipse cx="12" cy="9" rx="7" ry="5"/><path d="M5 9v6a7 3 0 0 0 14 0V9"/></svg></div>
+        }
     </div>
     <div class="cb-pd-info">
-        <div class="cb-product-tag">@Model.CategoriaPrincipal personalizado</div>
+        <div class="cb-product-tag">@Model.CategoriaPrincipal</div>
         <h1>@Model.Nombre</h1>
         <div class="cb-pd-price" id="cb-pd-precio-mostrado">Q@(Model.Presentaciones.First().Precio.ToString("0.00"))</div>
         <p class="cb-pd-desc">@Model.Descripcion</p>
 
-        <form id="form-agregar-carrito" data-producto-id="@Model.Id" data-producto-nombre="@Model.Nombre">
+        <form id="form-agregar-carrito" data-producto-id="@Model.Id" data-producto-nombre="@Model.Nombre" data-producto-imagen="@Model.ImagenUrl">
             @if (Model.Presentaciones.Count > 1)
             {
                 <div class="cb-config-block">
@@ -34,36 +80,31 @@
             }
             else if (Model.Presentaciones.Count == 1)
             {
-                // Un producto con una sola presentación no necesita
-                // selector — solo se muestra el precio directo, tal como
-                // documenta el análisis funcional de productos. El botón
-                // sigue existiendo (oculto) para que configurador.js
-                // encuentre el mismo data-presentacion-id al armar el carrito.
                 var unica = Model.Presentaciones[0];
-                <button type="button" class="cb-size-option active" data-valor="@unica.Nombre"
-                        data-precio="@unica.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
-                        data-presentacion-id="@unica.Id" hidden></button>
+                <div class="cb-size-options" data-config="tamano" hidden>
+                    <button type="button" class="cb-size-option active" data-valor="@unica.Nombre"
+                            data-precio="@unica.Precio.ToString(System.Globalization.CultureInfo.InvariantCulture)"
+                            data-presentacion-id="@unica.Id"></button>
+                </div>
             }
 
-            @if (Model.CategoriaPrincipal == "Pastel" || Model.CategoriaPrincipal == "Pasteles")
+            @for (int g = 0; g < gruposPersonalizacion.Count; g++)
             {
+                var grupo = gruposPersonalizacion[g];
+                var esSeleccionUnica = grupo.Key == "Decoración";
                 <div class="cb-config-block">
-                    <h4>Color de decoración</h4>
-                    <div class="cb-swatch-row" data-config="color">
-                        <button type="button" class="cb-swatch active" data-valor="Ciruela" style="background:#7C2B3B;"></button>
-                        <button type="button" class="cb-swatch" data-valor="Dorado" style="background:#C9982E;"></button>
-                        <button type="button" class="cb-swatch" data-valor="Blush" style="background:#F2D6C9;"></button>
-                        <button type="button" class="cb-swatch" data-valor="Chocolate" style="background:#3A2419;"></button>
-                    </div>
-                </div>
-
-                <div class="cb-config-block">
-                    <h4>Toppings y flores comestibles</h4>
-                    <div class="cb-chip-row" data-config="toppings" data-multiple="true">
-                        <button type="button" class="cb-chip active" data-valor="Flores comestibles">Flores comestibles</button>
-                        <button type="button" class="cb-chip" data-valor="Chocolate rallado">Chocolate rallado</button>
-                        <button type="button" class="cb-chip" data-valor="Frutos rojos">Frutos rojos</button>
-                        <button type="button" class="cb-chip" data-valor="Hojas de menta">Hojas de menta</button>
+                    <h4>@grupo.Key</h4>
+                    <div class="cb-chip-row" data-config="personalizacion-@g" data-multiple="@(esSeleccionUnica ? "false" : "true")">
+                        @{ var primero = true; }
+                        @foreach (var op in grupo)
+                        {
+                            <button type="button" class="cb-chip @(esSeleccionUnica && primero ? "active" : "")"
+                                    data-valor="@op.Opcion!.Nombre" data-opcion-id="@op.Id"
+                                    data-precio="@op.PrecioAdicional.ToString(System.Globalization.CultureInfo.InvariantCulture)">
+                                @op.Opcion!.Nombre@(op.PrecioAdicional > 0 ? $" (+Q{op.PrecioAdicional:0.00})" : "")
+                            </button>
+                            primero = false;
+                        }
                     </div>
                 </div>
             }
@@ -98,6 +139,91 @@
     </div>
 </div>
 
+<style>
+    .cb-pd-carousel {
+        position: relative;
+        width: 100%;
+        aspect-ratio: 1 / 1;
+        overflow: hidden;
+        border-radius: 12px;
+        background: #F2E4D0;
+    }
+    .cb-pd-carousel-track {
+        display: flex;
+        height: 100%;
+        transition: transform 0.35s ease;
+    }
+    .cb-pd-carousel-slide {
+        flex: 0 0 100%;
+        height: 100%;
+    }
+    .cb-pd-carousel-slide img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+    }
+    .cb-pd-carousel-arrow {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255,255,255,0.85);
+        border: none;
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        font-size: 20px;
+        line-height: 1;
+        cursor: pointer;
+        color: #7C2B3B;
+    }
+    .cb-pd-carousel-prev { left: 12px; }
+    .cb-pd-carousel-next { right: 12px; }
+    .cb-pd-carousel-dots {
+        position: absolute;
+        bottom: 12px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 6px;
+    }
+    .cb-pd-carousel-dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        border: none;
+        background: rgba(255,255,255,0.6);
+        cursor: pointer;
+        padding: 0;
+    }
+    .cb-pd-carousel-dot.active {
+        background: #7C2B3B;
+    }
+</style>
+
 @section Scripts {
     <script src="~/js/configurador.js" asp-append-version="true"></script>
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const carousel = document.querySelector("[data-carousel]");
+            if (!carousel) return;
+
+            const track = carousel.querySelector(".cb-pd-carousel-track");
+            const slides = carousel.querySelectorAll(".cb-pd-carousel-slide");
+            const dots = carousel.querySelectorAll(".cb-pd-carousel-dot");
+            const prevBtn = carousel.querySelector(".cb-pd-carousel-prev");
+            const nextBtn = carousel.querySelector(".cb-pd-carousel-next");
+            let indice = 0;
+
+            function irA(nuevoIndice) {
+                indice = (nuevoIndice + slides.length) % slides.length;
+                track.style.transform = `translateX(-${indice * 100}%)`;
+                dots.forEach((dot, i) => dot.classList.toggle("active", i === indice));
+            }
+
+            prevBtn?.addEventListener("click", () => irA(indice - 1));
+            nextBtn?.addEventListener("click", () => irA(indice + 1));
+            dots.forEach((dot) => dot.addEventListener("click", () => irA(parseInt(dot.dataset.index, 10))));
+        });
+    </script>
 }

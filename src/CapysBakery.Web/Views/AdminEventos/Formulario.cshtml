@@ -1,0 +1,74 @@
+@model PaqueteEvento
+@{
+    bool esEdicion = Model.Id != 0;
+    ViewData["Title"] = esEdicion ? "Editar paquete" : "Nuevo paquete";
+}
+
+<div class="cb-admin-layout" style="max-width:640px;">
+    <h1 style="font-size:26px; margin-bottom:24px;">@ViewData["Title"]</h1>
+
+    <form asp-action="@(esEdicion ? "Editar" : "Crear")" method="post">
+        @Html.AntiForgeryToken()
+        <input type="hidden" asp-for="Id" />
+
+        @if (!ViewData.ModelState.IsValid)
+        {
+            <div asp-validation-summary="ModelOnly" class="cb-form-error"></div>
+        }
+
+        <div class="cb-cf-line">
+            <label asp-for="Nombre">Nombre del paquete</label>
+            <input asp-for="Nombre" class="cb-form-input" placeholder="Ej. Bodas" />
+        </div>
+
+        <div class="cb-cf-line">
+            <label asp-for="Subtitulo">Subtítulo <span class="opt">(se muestra bajo el nombre)</span></label>
+            <input asp-for="Subtitulo" class="cb-form-input" placeholder="Ej. Mesa dulce completa" />
+        </div>
+
+        <div class="cb-cf-line">
+            <label asp-for="Descripcion">Descripción interna <span class="opt">(no se muestra en la tarjeta pública)</span></label>
+            <textarea asp-for="Descripcion" class="cb-form-input cb-textarea" placeholder="Nota para uso interno del panel"></textarea>
+        </div>
+
+        <div class="cb-cf-row-2">
+            <div class="cb-cf-line">
+                <label asp-for="Precio">Precio (Q)</label>
+                <input asp-for="Precio" type="number" step="0.01" min="0" class="cb-form-input" />
+            </div>
+            <div class="cb-cf-line">
+                <label asp-for="UnidadPrecio">Unidad del precio</label>
+                <input asp-for="UnidadPrecio" class="cb-form-input" placeholder="hasta 15 personas" />
+            </div>
+        </div>
+
+        <div class="cb-cf-line">
+            <label asp-for="Etiqueta">Etiqueta destacada <span class="opt">(opcional)</span></label>
+            <input asp-for="Etiqueta" class="cb-form-input" placeholder="Ej. Más popular" />
+        </div>
+
+        <div class="cb-cf-line">
+            <label asp-for="Incluye">Qué incluye</label>
+            <textarea asp-for="Incluye" class="cb-form-input cb-textarea" placeholder="Un ítem por línea, ej.&#10;Pastel de 2 pisos&#10;Mesa de dulces&#10;Servicio para 50 personas"></textarea>
+            <div class="cb-hint-text">Un ítem por línea — se le agrega el ✓ automáticamente en la tarjeta pública.</div>
+        </div>
+
+        <div class="cb-cf-row-2">
+            <div class="cb-cf-line">
+                <label asp-for="Orden">Orden de aparición</label>
+                <input asp-for="Orden" type="number" class="cb-form-input" />
+            </div>
+            <div class="cb-cf-line" style="display:flex; align-items:flex-end; padding-bottom:13px;">
+                <label style="display:flex; align-items:center; gap:8px; margin:0; font-weight:600; font-size:12.5px; color:var(--ink);">
+                    <input asp-for="Activo" type="checkbox" style="width:16px; height:16px; margin:0;" />
+                    Visible en /Eventos
+                </label>
+            </div>
+        </div>
+
+        <div style="display:flex; gap:14px; margin-top:8px;">
+            <button type="submit" class="btn cb-btn-plum">Guardar</button>
+            <a asp-action="Index" class="btn cb-btn-outline">Cancelar</a>
+        </div>
+    </form>
+</div>

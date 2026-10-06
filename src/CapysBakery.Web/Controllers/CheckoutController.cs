@@ -87,6 +87,16 @@ public class CheckoutController : Controller
             return BadRequest(new { mensaje = "La dirección de entrega es obligatoria para Envío." });
         }
 
+        // La entrega mínima es MAÑANA — hoy mismo no es una opción válida.
+        // Esto ya se bloquea en el calendario del formulario (flatpickr,
+        // ver DatosCliente.cshtml), pero se valida aquí también porque este
+        // endpoint puede recibir peticiones directas que se salten la
+        // interfaz.
+        if (!DateTime.TryParse(entrada.Fecha, out var fechaEntrega) || fechaEntrega.Date <= DateTime.Today)
+        {
+            return BadRequest(new { mensaje = "La fecha de entrega debe ser al menos un día después de hoy." });
+        }
+
         var usuarioIdTexto = User.FindFirstValue(ClaimTypes.NameIdentifier);
         int? usuarioId = int.TryParse(usuarioIdTexto, out var id) ? id : null;
 
@@ -94,7 +104,7 @@ public class CheckoutController : Controller
         {
             NombreCliente = entrada.Nombre,
             TelefonoCliente = entrada.Telefono,
-            FechaEntregaSolicitada = DateTime.TryParse(entrada.Fecha, out var fecha) ? fecha : DateTime.Today,
+            FechaEntregaSolicitada = fechaEntrega,
             ModalidadEntregaId = modalidad.Id,
             DireccionOPuntoEntrega = entrada.Direccion,
             MetodoPagoId = metodoPago.Id,
@@ -114,12 +124,28 @@ public class CheckoutController : Controller
 
             if (presentacionId is null or 0) continue;
 
-            pedido.Detalles.Add(new PedidoDetalle
+            var detalle = new PedidoDetalle
             {
                 PresentacionId = presentacionId.Value,
                 Cantidad = item.Cantidad,
-                PrecioUnitario = item.Precio, // precio congelado al momento de la compra
-            });
+                PrecioUnitario = item.Precio, // precio congelado al momento de la compra (ya incluye personalizaciones)
+            };
+
+            // Personalizaciones elegidas para esta línea (color, topping,
+            // etc.), con su costo adicional también congelado — igual que
+            // PrecioUnitario, no debe cambiar si el admin edita el precio
+            // después. Antes esto no se guardaba nunca; el pedido perdía
+            // por completo qué personalización había elegido el cliente.
+            foreach (var personalizacion in item.Personalizaciones ?? new())
+            {
+                detalle.Personalizaciones.Add(new PedidoDetallePersonalizacion
+                {
+                    ProductoOpcionId = personalizacion.ProductoOpcionId,
+                    PrecioAdicionalUnitario = personalizacion.PrecioAdicionalUnitario,
+                });
+            }
+
+            pedido.Detalles.Add(detalle);
         }
 
         if (pedido.Detalles.Count == 0)
@@ -166,4 +192,19 @@ public class PedidoItemEntradaDto
     public string Nombre { get; set; } = string.Empty;
     public decimal Precio { get; set; }
     public int Cantidad { get; set; }
+
+    // Personalizaciones elegidas para esta línea (color, topping, etc.),
+    // que configurador.js/carrito.js arman al agregar el producto — antes
+    // no existía este campo y el servidor no tenía forma de saber qué
+    // personalización había elegido el cliente.
+    public List<PersonalizacionEntradaDto>? Personalizaciones { get; set; }
+}
+
+public class PersonalizacionEntradaDto
+{
+    // Id de producto_opcion_personalizacion (la opción YA ligada a este
+    // producto con su precio), no el id genérico de opcion_personalizacion
+    // — así es como se referencia en pedido_detalle_personalizacion.
+    public int ProductoOpcionId { get; set; }
+    public decimal PrecioAdicionalUnitario { get; set; }
 }

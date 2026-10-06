@@ -10,7 +10,14 @@
         <p>Hoy seguimos siendo un equipo pequeño, horneando en lotes cortos para garantizar frescura, y creyendo que un buen postre puede hacer memorable cualquier celebración.</p>
     </div>
     <div class="cb-about-hero-img">
-        <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1"><path d="M4 12c2-6 14-6 16 0M4 12c1 5 4 8 8 8s7-3 8-8M4 12h16"/></svg>
+        @if (!string.IsNullOrEmpty(ViewBag.ImagenHistoria))
+        {
+            <img src="@ViewBag.ImagenHistoria" alt="Nuestra historia" style="width:100%; height:100%; object-fit:cover; border-radius:8px;" />
+        }
+        else
+        {
+            <svg width="120" height="120" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="1"><path d="M4 12c2-6 14-6 16 0M4 12c1 5 4 8 8 8s7-3 8-8M4 12h16"/></svg>
+        }
     </div>
 </div>
 

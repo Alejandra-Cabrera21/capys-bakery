@@ -45,4 +45,20 @@ public interface IProductoRepository
     Categoria? ObtenerCategoriaPorId(int id);
     Categoria CrearCategoria(string nombre);
     bool ActualizarCategoria(int id, string nuevoNombre, bool disponible);
+
+    // Elimina la imagen de un slot (1 a 5) de un producto ya publicado,
+    // sin tocar las demás. El slot 1 es la principal — se puede borrar
+    // igual; si un producto se queda sin ninguna imagen, la vista ya
+    // maneja ese caso mostrando el ícono de marcador (mismo comportamiento
+    // que un producto que nunca tuvo fotos).
+    bool EliminarImagen(int productoId, int slot);
+
+    // Catálogo global de personalización (tipos + sus opciones: Decoración
+    // -> Ciruela/Dorado/..., Topping -> Flores comestibles/...), para que
+    // el panel de AdminProductos pueda ofrecer checkboxes de qué opciones
+    // aplican a cada producto y a qué precio adicional (ver
+    // ProductoOpcionPersonalizacion). Antes esto no lo usaba ninguna
+    // pantalla; ahora es lo que reemplaza los botones de color/toppings
+    // fijos de Catalogo/Detalle.
+    List<TipoPersonalizacion> ObtenerTiposPersonalizacion();
 }

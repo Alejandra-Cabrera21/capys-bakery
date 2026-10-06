@@ -8,6 +8,12 @@
     var comentarios = ViewBag.Comentarios as List<ComentarioPublicacion> ?? new();
 }
 
+<div style="max-width:1400px; margin:0 auto; padding:24px 56px 0 56px;">
+    <a asp-controller="Blog" asp-action="Index" style="color:var(--ink-soft); font-size:13.5px; text-decoration:none;">
+        ← Volver al blog
+    </a>
+</div>
+
 <div class="cb-catalog-hero">
     <span class="eyebrow">
         @Model.Categoria · @Model.FechaPublicacion.ToString("d MMMM yyyy")

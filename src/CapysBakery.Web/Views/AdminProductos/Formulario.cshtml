@@ -3,6 +3,21 @@
     ViewData["Title"] = (bool)(ViewBag.EsEdicion ?? false) ? "Editar producto" : "Publicar producto";
     var categorias = ViewBag.Categorias as List<CapysBakery.Web.Models.Categoria> ?? new();
     var accion = (bool)(ViewBag.EsEdicion ?? false) ? "Editar" : "Crear";
+    var esEdicion = (bool)(ViewBag.EsEdicion ?? false);
+    var imagenesPorSlot = Model.Imagenes.ToDictionary(i => i.Orden, i => i.UrlImagen);
+
+    // ==========================================================
+    // PERSONALIZACIONES: aplana el catálogo global (tipos -> opciones,
+    // ej. Decoración -> Ciruela/Dorado/..., Topping -> Flores/...) en una
+    // sola lista de filas, y arma un diccionario de lo que este producto
+    // YA tiene habilitado (para precargar el checkbox y el precio).
+    // ==========================================================
+    var tiposPersonalizacion = ViewBag.TiposPersonalizacion as List<CapysBakery.Web.Models.TipoPersonalizacion> ?? new();
+    var filasPersonalizacion = tiposPersonalizacion
+        .Where(t => t.Opciones.Any())
+        .SelectMany(t => t.Opciones.Select(o => new { Tipo = t.Nombre, Opcion = o }))
+        .ToList();
+    var opcionesActuales = Model.OpcionesPersonalizacion.ToDictionary(o => o.OpcionId);
 }
 
 <div class="cb-catalog-hero">
@@ -55,32 +70,39 @@
             <textarea id="Descripcion" name="Descripcion" class="cb-form-input cb-textarea" placeholder="Descripción comercial que verá el cliente">@Model.Descripcion</textarea>
         </div>
 
-        <div class="cb-cf-line">
-            <label for="imagen">Imagen principal <span class="opt">(obligatoria)</span></label>
-            <input type="file" id="imagen" name="imagen" class="cb-form-input" accept="image/*" required="@(!(bool)(ViewBag.EsEdicion ?? false))" />
-            @if (!string.IsNullOrEmpty(Model.ImagenUrl))
-            {
-                <div style="margin-top:10px;">
-                    <img src="@Model.ImagenUrl" alt="Imagen actual" style="max-width:140px; border-radius:10px; border:1px solid #EEE1CC;" />
-                    <p class="cb-admin-sub">Imagen actual — sube un archivo nuevo solo si quieres reemplazarla.</p>
-                </div>
-            }
-        </div>
-
-        <div class="cb-cf-line">
-            <label for="imagenSecundaria">Segunda imagen <span class="opt">(opcional)</span></label>
-            <input type="file" id="imagenSecundaria" name="imagenSecundaria" class="cb-form-input" accept="image/*" />
-            @{
-                var imagenSecundariaActual = Model.Imagenes.FirstOrDefault(i => !i.EsPrincipal)?.UrlImagen;
-            }
-            @if (!string.IsNullOrEmpty(imagenSecundariaActual))
-            {
-                <div style="margin-top:10px;">
-                    <img src="@imagenSecundariaActual" alt="Segunda imagen actual" style="max-width:140px; border-radius:10px; border:1px solid #EEE1CC;" />
-                    <p class="cb-admin-sub">Segunda imagen actual — sube un archivo nuevo solo si quieres reemplazarla.</p>
-                </div>
-            }
-        </div>
+        @* ==========================================================
+           IMÁGENES: 5 casillas (1 obligatoria + 4 opcionales).
+           Cada una corresponde a un "slot" fijo (Orden 1 a 5) — subir
+           una imagen nueva en un slot reemplaza SOLO esa, las demás
+           se conservan tal como ya hacía antes con principal/secundaria.
+           ========================================================== *@
+        @for (int slot = 1; slot <= 5; slot++)
+        {
+            var esPrincipal = slot == 1;
+            var etiqueta = esPrincipal ? "Imagen principal" : $"Imagen {slot}";
+            var esObligatoria = esPrincipal && !esEdicion;
+            <div class="cb-cf-line">
+                <label for="imagen@(slot)">@etiqueta <span class="opt">@(esPrincipal ? "(obligatoria)" : "(opcional)")</span></label>
+                <input type="file" id="imagen@(slot)" name="imagen@(slot)" class="cb-form-input" accept="image/*" required="@esObligatoria" />
+                @if (imagenesPorSlot.TryGetValue(slot, out var urlActual))
+                {
+                    <div style="margin-top:10px;">
+                        <img src="@urlActual" alt="Imagen actual" style="max-width:140px; border-radius:10px; border:1px solid #EEE1CC;" />
+                        <p class="cb-admin-sub">Imagen actual — sube un archivo nuevo solo si quieres reemplazarla.</p>
+                        @if (esEdicion)
+                        {
+                            <button type="submit"
+                                    formaction="@Url.Action("EliminarImagen", "AdminProductos", new { id = Model.Id, slot })"
+                                    formmethod="post"
+                                    class="cb-admin-link-btn" style="color:#B3372C; margin-top:4px;"
+                                    onclick="return confirm('¿Eliminar esta imagen? Esta acción no se puede deshacer.');">
+                                Eliminar imagen
+                            </button>
+                        }
+                    </div>
+                }
+            </div>
+        }
 
         <div class="cb-cf-line">
             <label>Presentaciones y precios</label>
@@ -88,6 +110,7 @@
                 @for (var i = 0; i < Model.Presentaciones.Count; i++)
                 {
                     <div class="cb-presentacion-row">
+                        <input type="hidden" name="Presentaciones[@i].Id" value="@Model.Presentaciones[i].Id" />
                         <input type="text" name="Presentaciones[@i].Nombre" class="cb-form-input" placeholder="Ej. Mediano (8 porciones)" value="@Model.Presentaciones[i].Nombre" required />
                         <input type="number" name="Presentaciones[@i].Porciones" class="cb-form-input" placeholder="Porciones" min="1" value="@Model.Presentaciones[i].Porciones" />
                         <input type="number" step="0.01" name="Presentaciones[@i].Precio" class="cb-form-input" placeholder="Precio Q" min="0" value="@Model.Presentaciones[i].Precio" required />
@@ -97,6 +120,7 @@
                 @if (Model.Presentaciones.Count == 0)
                 {
                     <div class="cb-presentacion-row">
+                        <input type="hidden" name="Presentaciones[0].Id" value="0" />
                         <input type="text" name="Presentaciones[0].Nombre" class="cb-form-input" placeholder="Ej. Individual" required />
                         <input type="number" name="Presentaciones[0].Porciones" class="cb-form-input" placeholder="Porciones" min="1" />
                         <input type="number" step="0.01" name="Presentaciones[0].Precio" class="cb-form-input" placeholder="Precio Q" min="0" required />
@@ -108,6 +132,56 @@
             <p class="cb-hint-text">El precio "desde" que se muestra en catálogo es siempre el de la presentación más económica.</p>
         </div>
 
+        @* ==========================================================
+           PERSONALIZACIONES: qué opciones de color/topping puede elegir
+           el cliente para ESTE producto en Catalogo/Detalle, y cuánto se
+           cobra de más por cada una. Si el catálogo global (tipo_personalizacion
+           / opcion_personalizacion) todavía no tiene ninguna opción
+           cargada, esta sección simplemente no aparece.
+           ========================================================== *@
+        @if (filasPersonalizacion.Any())
+        {
+            <div class="cb-cf-line">
+                <label>Personalizaciones disponibles</label>
+                <p class="cb-hint-text" style="margin-bottom:10px;">
+                    Marca qué opciones puede elegir el cliente para este producto y cuánto se cobra de más por cada una. Déjala sin marcar si no aplica a este producto.
+                </p>
+                @{ string? tipoAnterior = null; }
+                @for (int i = 0; i < filasPersonalizacion.Count; i++)
+                {
+                    var fila = filasPersonalizacion[i];
+                    var actual = opcionesActuales.TryGetValue(fila.Opcion.Id, out var op) ? op : null;
+                    var marcada = actual?.Disponible ?? false;
+                    var precio = actual?.PrecioAdicional ?? 0;
+
+                    if (fila.Tipo != tipoAnterior)
+                    {
+                        <p style="font-size:13px; font-weight:600; margin:14px 0 6px;">@fila.Tipo</p>
+                        tipoAnterior = fila.Tipo;
+                    }
+
+                    <div style="display:flex; align-items:center; gap:10px; padding:6px 0; border-bottom:1px solid #EEE1CC;">
+                        <input type="hidden" name="personalizaciones[@i].OpcionId" value="@fila.Opcion.Id" />
+                        @* OJO: el checkbox va ANTES del hidden con el mismo "name". El
+                           navegador manda los valores en orden de aparición en el HTML, y
+                           el model binder de ASP.NET Core toma el PRIMER valor cuando hay
+                           varios con el mismo nombre. Si el hidden fuera primero, siempre
+                           se leería "false" así el checkbox estuviera marcado. *@
+                        <input type="checkbox" name="personalizaciones[@i].Habilitada" value="true" checked="@marcada" style="width:16px; height:16px; flex:none;" />
+                        <input type="hidden" name="personalizaciones[@i].Habilitada" value="false" />
+                        <span style="flex:1; font-size:13.5px;">@fila.Opcion.Nombre</span>
+                        <input type="number" step="0.01" min="0" name="personalizaciones[@i].PrecioAdicional" class="cb-form-input" placeholder="Precio adicional Q" value="@precio" style="width:130px;" />
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <p class="cb-hint-text">
+                Todavía no hay opciones de personalización cargadas en el catálogo (colores, toppings, etc.). Pide que se agreguen en <code>opcion_personalizacion</code> para poder ofrecerlas aquí.
+            </p>
+        }
+
         <div class="cb-cf-row-2" style="display:flex; gap:24px; align-items:center; margin: 20px 0;">
             <label style="display:flex; align-items:center; gap:8px; font-size:13px;">
                 <input type="checkbox" name="Disponible" value="true" checked="@Model.Disponible" /> Visible en el catálogo
@@ -115,11 +189,17 @@
             <label style="display:flex; align-items:center; gap:8px; font-size:13px;">
                 <input type="checkbox" name="EsPromocion" value="true" checked="@Model.EsPromocion" /> Marcar como promoción
             </label>
+            <label style="display:flex; align-items:center; gap:8px; font-size:13px;">
+                <input type="checkbox" name="EsDestacado" value="true" checked="@Model.EsDestacado" /> Destacar en el Home ("Lo más pedido")
+            </label>
         </div>
 
-        <button type="submit" class="btn cb-btn-plum" style="width:100%;">
-            @((bool)(ViewBag.EsEdicion ?? false) ? "Guardar cambios" : "Publicar producto")
-        </button>
+        <div style="display:flex; gap:10px;">
+            <a asp-controller="AdminProductos" asp-action="Index" class="btn cb-btn-outline" style="flex:1; text-align:center;">Cancelar</a>
+            <button type="submit" class="btn cb-btn-plum" style="flex:2;">
+                @((bool)(ViewBag.EsEdicion ?? false) ? "Guardar cambios" : "Publicar producto")
+            </button>
+        </div>
     </form>
 </div>
 

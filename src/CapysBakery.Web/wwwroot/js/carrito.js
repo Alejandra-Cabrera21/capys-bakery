@@ -5,7 +5,7 @@
 //
 // Estructura guardada en localStorage bajo la llave "capys_carrito":
 // [
-//   { id, nombre, precio, cantidad, opciones: { tamano, color, toppings } }
+//   { id, nombre, imagenUrl, precio, cantidad, opciones: { tamano, color, toppings } }
 // ]
 
 const CapysCarrito = (() => {
@@ -90,12 +90,27 @@ const CapysCarrito = (() => {
 
         carrito.forEach((item, indice) => {
             const nodo = template.content.cloneNode(true);
+            const thumb = nodo.querySelector(".cb-cart-thumb");
+            if (thumb) {
+                if (item.imagenUrl) {
+                    thumb.style.backgroundImage = `url('${item.imagenUrl}')`;
+                    thumb.style.backgroundSize = "cover";
+                    thumb.style.backgroundPosition = "center";
+                } else {
+                    thumb.style.background = "linear-gradient(135deg,#F2D6C9,#E8B876)";
+                }
+            }
             nodo.querySelector(".cb-cart-item-name").textContent = item.nombre;
 
             const opciones = [];
             if (item.opciones?.tamano) opciones.push(item.opciones.tamano);
-            if (item.opciones?.color) opciones.push(`Decoración ${item.opciones.color}`);
-            if (item.opciones?.toppings?.length) opciones.push(item.opciones.toppings.join(", "));
+            // Personalizaciones (color, topping, etc.) ahora vienen de la
+            // base de datos, no de campos fijos "color"/"toppings" — cada
+            // una ya trae su nombre real y su precio adicional (ver
+            // configurador.js). item.precio ya incluye ese recargo sumado.
+            if (item.personalizaciones?.length) {
+                opciones.push(item.personalizaciones.map(p => p.nombre).join(", "));
+            }
             nodo.querySelector(".cb-cart-item-opt").textContent = opciones.join(" · ");
 
             nodo.querySelector(".cb-qty-value").textContent = item.cantidad;
@@ -126,8 +141,10 @@ const CapysCarrito = (() => {
         const total = subtotal + envio;
 
         const elSubtotal = document.getElementById("cb-subtotal");
+        const elEnvio = document.getElementById("cb-envio");
         const elTotal = document.getElementById("cb-total");
         if (elSubtotal) elSubtotal.textContent = formatearMoneda(subtotal);
+        if (elEnvio) elEnvio.textContent = formatearMoneda(envio);
         if (elTotal) elTotal.textContent = formatearMoneda(total);
     }
 

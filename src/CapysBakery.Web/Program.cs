@@ -27,6 +27,9 @@ builder.Services.AddScoped<IUsuarioRepository, EfUsuarioRepository>();
 builder.Services.AddScoped<IPublicacionRepository, EfPublicacionRepository>();
 builder.Services.AddScoped<IEntregaPagoRepository, EfEntregaPagoRepository>();
 builder.Services.AddScoped<IPedidoRepository, EfPedidoRepository>();
+builder.Services.AddScoped<IContactoRepository, EfContactoRepository>();
+builder.Services.AddScoped<IContenidoSitioRepository, EfContenidoSitioRepository>();
+builder.Services.AddScoped<IEventoRepository, EfEventoRepository>();
 
 // Autenticación por cookie: permite tener sesión y roles (Cliente,
 // Administrador, Dueño) ya funcionando desde ahora, sin depender de que

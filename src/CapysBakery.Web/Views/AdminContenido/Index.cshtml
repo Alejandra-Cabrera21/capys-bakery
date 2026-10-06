@@ -1,0 +1,46 @@
+@model List<CapysBakery.Web.Controllers.SlotContenidoVm>
+@{
+    ViewData["Title"] = "Contenido del sitio";
+}
+
+<div class="cb-catalog-hero">
+    <h1 style="font-size:30px;">Contenido del sitio</h1>
+    <p>Sube o reemplaza las imágenes que se muestran en las páginas de contenido (Inicio, Nosotros, Eventos).</p>
+</div>
+
+@if (TempData["Mensaje"] is not null)
+{
+    <div class="cb-admin-layout" style="max-width:640px; padding-top:0;">
+        <div class="cb-wa-note"><p>@TempData["Mensaje"]</p></div>
+    </div>
+}
+
+<div class="cb-admin-layout" style="max-width:640px;">
+    @foreach (var slot in Model)
+    {
+        <div class="cb-pedido-card" style="margin-bottom:16px;">
+            <b style="font-size:14px;">@slot.Etiqueta</b>
+
+            @if (!string.IsNullOrEmpty(slot.UrlImagenActual))
+            {
+                <div style="margin:12px 0; display:flex; align-items:flex-end; gap:14px;">
+                    <img src="@slot.UrlImagenActual" alt="@slot.Etiqueta" style="max-width:220px; border-radius:10px; border:1px solid #EEE1CC;" />
+                    <form asp-controller="AdminContenido" asp-action="Eliminar" method="post" onsubmit="return confirm('¿Quitar esta imagen? Volverá a mostrarse el diseño original.');">
+                        <input type="hidden" name="clave" value="@slot.Clave" />
+                        <button type="submit" class="cb-admin-link-btn">Quitar imagen</button>
+                    </form>
+                </div>
+            }
+            else
+            {
+                <p class="cb-admin-sub" style="margin:8px 0;">Sin imagen todavía — se muestra el diseño original (ícono de marcador).</p>
+            }
+
+            <form asp-controller="AdminContenido" asp-action="Actualizar" method="post" enctype="multipart/form-data" style="display:flex; gap:10px; align-items:center; flex-wrap:wrap;">
+                <input type="hidden" name="clave" value="@slot.Clave" />
+                <input type="file" name="imagen" accept="image/*" class="cb-form-input" style="flex:1; min-width:200px;" required />
+                <button type="submit" class="btn cb-btn-plum">Subir</button>
+            </form>
+        </div>
+    }
+</div>

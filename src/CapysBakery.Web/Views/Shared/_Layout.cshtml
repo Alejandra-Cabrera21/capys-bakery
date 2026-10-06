@@ -45,6 +45,10 @@
                                 <a asp-controller="AdminCategorias" asp-action="Index" class="@(currentController == "AdminCategorias" ? "active" : "")">Categorías</a>
                                 <a asp-controller="Admin" asp-action="Pedidos" class="@(currentController == "Admin" ? "active" : "")">Pedidos</a>
                                 <a asp-controller="AdminBlog" asp-action="Index" class="@(currentController == "AdminBlog" ? "active" : "")">Blog</a>
+                                <a asp-controller="AdminMensajes" asp-action="Index" class="@(currentController == "AdminMensajes" ? "active" : "")">Mensajes</a>
+                                <a asp-controller="AdminContenido" asp-action="Index" class="@(currentController == "AdminContenido" ? "active" : "")">Contenido</a>
+                                <a asp-controller="AdminTestimonios" asp-action="Index" class="@(currentController == "AdminTestimonios" ? "active" : "")">Testimonios</a>
+                                <a asp-controller="AdminEventos" asp-action="Index" class="@(currentController == "AdminEventos" ? "active" : "")">Eventos</a>
                                 @if (User.IsInRole("Dueño"))
                                 {
                                     <a asp-controller="AdminUsuarios" asp-action="Index" class="@(currentController == "AdminUsuarios" ? "active" : "")">Cuentas</a>
@@ -133,8 +137,8 @@
             <div class="cb-footer-col">
                 <h5>Contacto</h5>
                 <div><a href="tel:+50248036717">+502 4803 6717</a></div>
-                <div><a href="mailto:hola@capysbakery.com">hola@capysbakery.com</a></div>
-                <div><a href="https://maps.google.com/?q=Zona+14,+Ciudad+de+Guatemala" target="_blank" rel="noopener">Zona 14, Ciudad de Guatemala</a></div>
+                <div><a href="mailto:bakery.capy@gmail.com">bakery.capy@gmail.com</a></div>
+                <div><a href="https://maps.google.com/?q=Zona+6,+14+avenida+A,+Ciudad+de+Guatemala" target="_blank" rel="noopener">Zona 6, 14 avenida A, Ciudad de Guatemala</a></div>
             </div>
         </div>
         <div class="cb-footer-bottom">

@@ -42,7 +42,34 @@
                 </div>
                 <p class="cb-admin-sub">@productos</p>
                 <div class="cb-summary-row"><span>@pedido.ModalidadEntrega?.Nombre</span><span>@pedido.MetodoPago?.Nombre</span></div>
-                <div class="cb-summary-row total"><span>Total</span><span>Q@pedido.Total.ToString("0.00")</span></div>
+                <div class="cb-summary-row total"><span>Total</span><span>Q@(pedido.Total.ToString("0.00"))</span></div>
+
+                @if (pedido.EstadoPedido?.Nombre == EstadosPedido.Entregado)
+                {
+                    @if (pedido.Calificacion is not null)
+                    {
+                        <div class="cb-admin-sub" style="margin-top:10px;">
+                            Tu calificación:
+                            <span style="color:#C9982E; letter-spacing:2px;">@(new string('★', pedido.Calificacion.Estrellas))@(new string('☆', 5 - pedido.Calificacion.Estrellas))</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <form asp-controller="Cuenta" asp-action="Calificar" method="post" style="margin-top:12px; border-top:1px solid #EEE1CC; padding-top:12px;">
+                            <input type="hidden" name="pedidoId" value="@pedido.Id" />
+                            <label class="cb-admin-sub" style="display:block; margin-bottom:6px;">¿Cómo calificarías este pedido?</label>
+                            <div class="cb-estrellas-input">
+                                @for (int i = 5; i >= 1; i--)
+                                {
+                                    <input type="radio" id="estrella-@(pedido.Id)-@i" name="estrellas" value="@i" required />
+                                    <label for="estrella-@(pedido.Id)-@i">★</label>
+                                }
+                            </div>
+                            <input type="text" name="comentario" class="cb-form-input" placeholder="Comentario (opcional)" style="margin-top:8px;" />
+                            <button type="submit" class="btn cb-btn-outline" style="margin-top:8px; width:100%;">Enviar calificación</button>
+                        </form>
+                    }
+                }
 
                 <button type="button" class="btn cb-btn-outline cb-pedir-de-nuevo" style="width:100%; margin-top:12px;"
                         data-items="@Html.Raw(System.Net.WebUtility.HtmlEncode(System.Text.Json.JsonSerializer.Serialize(itemsParaJs)))">
@@ -56,3 +83,25 @@
 @section Scripts {
     <script src="~/js/mis-pedidos.js" asp-append-version="true"></script>
 }
+
+<style>
+    .cb-estrellas-input {
+        display: flex;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 2px;
+    }
+    .cb-estrellas-input input[type="radio"] {
+        display: none;
+    }
+    .cb-estrellas-input label {
+        font-size: 24px;
+        color: #E0D3C0;
+        cursor: pointer;
+    }
+    .cb-estrellas-input input[type="radio"]:checked ~ label,
+    .cb-estrellas-input label:hover,
+    .cb-estrellas-input label:hover ~ label {
+        color: #C9982E;
+    }
+</style>

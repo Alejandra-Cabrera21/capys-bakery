@@ -1,0 +1,87 @@
+@model List<PaqueteEvento>
+@{
+    ViewData["Title"] = "Paquetes de eventos";
+}
+
+<div class="cb-admin-layout">
+    <div class="cb-admin-toolbar">
+        <h1 style="font-size:28px; margin:0;">Paquetes de eventos</h1>
+        <a asp-action="Crear" class="btn cb-btn-plum">+ Nuevo paquete</a>
+    </div>
+
+    @if (TempData["Mensaje"] != null)
+    {
+        <div class="cb-form-success">@TempData["Mensaje"]</div>
+    }
+
+    <p style="color:var(--ink-soft); font-size:13.5px; margin-bottom:22px; max-width:640px;">
+        Estos paquetes son los que se muestran en la página pública <strong>/Eventos</strong>.
+        Un paquete "oculto" no se elimina, solo se deja de mostrar — útil si quieres
+        reactivarlo más adelante.
+    </p>
+
+    <table class="cb-admin-table">
+        <thead>
+            <tr>
+                <th>Orden</th>
+                <th>Nombre</th>
+                <th>Precio</th>
+                <th>Etiqueta</th>
+                <th>Estado</th>
+                <th>Acciones</th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (!Model.Any())
+            {
+                <tr>
+                    <td colspan="6" style="text-align:center; color:var(--ink-soft); padding:34px;">
+                        Todavía no hay paquetes creados. Usa "+ Nuevo paquete" para agregar el primero.
+                    </td>
+                </tr>
+            }
+            @foreach (var paquete in Model)
+            {
+                <tr>
+                    <td>@paquete.Orden</td>
+                    <td>
+                        <strong>@paquete.Nombre</strong>
+                        @if (!string.IsNullOrWhiteSpace(paquete.Subtitulo))
+                        {
+                            <div class="cb-admin-sub">@paquete.Subtitulo</div>
+                        }
+                    </td>
+                    <td>Q@(paquete.Precio.ToString("0.00"))</td>
+                    <td>@(string.IsNullOrWhiteSpace(paquete.Etiqueta) ? "—" : paquete.Etiqueta)</td>
+                    <td>
+                        <span class="cb-estado-pill @(paquete.Activo ? "cb-estado-disponible" : "cb-estado-oculto")">
+                            @(paquete.Activo ? "Visible" : "Oculto")
+                        </span>
+                    </td>
+                    <td>
+                        <a asp-action="Editar" asp-route-id="@paquete.Id" class="cb-admin-link">Editar</a>
+
+                        <form asp-action="CambiarActivo" method="post" style="display:inline;">
+                            <input type="hidden" name="id" value="@paquete.Id" />
+                            @* OJO: si el valor es un bool puesto directo en el atributo
+                               (value="@(!paquete.Activo)"), Razor lo trata como "atributo
+                               condicional": si es true escribe value="value" (literal) y si
+                               es false OMITE el atributo por completo — nunca escribe
+                               "True"/"False" como texto. Por eso el servidor siempre recibía
+                               algo que no era true ni false. Convertirlo a string explícito
+                               con el ternario evita ese comportamiento especial. *@
+                            <input type="hidden" name="activo" value="@(paquete.Activo ? "false" : "true")" />
+                            <button type="submit" class="cb-admin-link-btn">@(paquete.Activo ? "Ocultar" : "Mostrar")</button>
+                        </form>
+
+                        <form asp-action="Eliminar" method="post" style="display:inline;"
+                              onsubmit="return confirm('¿Eliminar el paquete &quot;@paquete.Nombre&quot;? Esta acción no se puede deshacer.');">
+                            <input type="hidden" name="id" value="@paquete.Id" />
+                            <button type="submit" class="cb-admin-link-btn" style="color:#A33;">Eliminar</button>
+                        </form>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
