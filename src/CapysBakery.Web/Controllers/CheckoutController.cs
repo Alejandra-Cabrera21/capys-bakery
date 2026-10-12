@@ -153,15 +153,7 @@ public class CheckoutController : Controller
             return BadRequest(new { mensaje = "No se pudo resolver ningún producto del carrito." });
         }
 
-        try
-        {
-            _pedidoRepository.CrearPedido(pedido);
-        }
-        catch (Exception ex)
-        {
-            // TEMPORAL: solo para diagnosticar en producción
-            return StatusCode(500, new { mensaje = "ERROR: " + (ex.InnerException?.Message ?? ex.Message) });
-        }
+        _pedidoRepository.CrearPedido(pedido);
 
         return Json(new
         {
