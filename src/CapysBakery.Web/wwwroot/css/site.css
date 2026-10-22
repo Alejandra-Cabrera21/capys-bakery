@@ -1087,3 +1087,32 @@ a {
     }
     .cb-nav-dropdown-label { text-align: left; border-bottom: none; padding: 4px 0; }
 }
+/* =========================================================
+   Ajustes móvil: tarjetas del catálogo (menú) y ficha de producto.
+   Va AL FINAL del archivo para que pise las reglas anteriores.
+   ========================================================= */
+@media (max-width: 991px) {
+    /* Catálogo: antes conservaba 56px de margen a cada lado en celular,
+       por eso las tarjetas quedaban muy angostas. */
+    .cb-catalog-hero { padding: 32px 20px 20px 20px; }
+    .cb-catalog-layout { padding: 0 20px 50px 20px; gap: 20px; }
+    .cb-catalog-grid-wrap { flex: none; width: 100%; min-width: 0; }
+    .cb-grid-3 { gap: 16px; }
+
+    /* Ficha de producto: en columna, align-items:flex-start encogía el
+       cuadro de la imagen al tamaño de su contenido. Ahora usa todo el ancho. */
+    .cb-pd-layout { align-items: stretch; gap: 28px; padding: 28px 20px 50px 20px; }
+    .cb-pd-gallery { flex: none; width: 100%; }
+    .cb-pd-main-img { width: 100%; height: 320px; }
+    .cb-pd-info { flex: none; width: 100%; }
+}
+
+@media (max-width: 576px) {
+    .cb-grid-3 { gap: 12px; }
+    .cb-product-body { padding: 12px 12px 14px 12px; }
+    .cb-product-name { font-size: 15px; }
+    .cb-product-desc { font-size: 11.5px; min-height: 0; }
+    .cb-product-price { font-size: 14.5px; }
+    .cb-add-btn { width: 30px; height: 30px; }
+    .cb-pd-main-img { height: 260px; }
+}
