@@ -1116,3 +1116,63 @@ a {
     .cb-add-btn { width: 30px; height: 30px; }
     .cb-pd-main-img { height: 260px; }
 }
+
+/* =========================================================
+   Ajustes móvil 2: la página se podía arrastrar a los lados
+   (desbordamiento horizontal). Causas corregidas:
+   - Newsletter: el formulario (input 260px + botón) no cabía y el botón
+     "Suscribirme" se salía del recuadro café.
+   - Sello "hecho a mano": sobresalía por la izquierda de la pantalla.
+   - Padding duplicado (sección + contenedor interno) que dejaba el
+     contenido angosto y corrido.
+   - Imagen del hero: se recortaba con object-fit:cover y cortaba el texto
+     del afiche.
+   Va AL FINAL del archivo.
+   ========================================================= */
+
+/* Seguro general: nada debe ensanchar la página */
+html, body { max-width: 100%; overflow-x: hidden; }
+img, svg, video { max-width: 100%; }
+
+@media (max-width: 991px) {
+    /* ---- Hero ---- */
+    .cb-hero { align-items: stretch; gap: 40px; padding-top: 36px; padding-bottom: 56px; }
+    .cb-hero-copy { flex: none; }
+    .cb-hero-visual { flex: none; width: 100%; }
+    .cb-hero-img { height: 260px; }
+    .cb-hero-img:has(img) { height: auto; background: none; }
+    .cb-hero-img img { width: 100%; height: auto !important; object-fit: contain !important; display: block; }
+    .cb-seal { left: 12px; bottom: -18px; width: 84px; height: 84px; font-size: 13px; }
+
+    /* ---- Secciones: quitar el padding doble ---- */
+    .cb-story, .cb-testi-row, .cb-footer-grid { padding-left: 0; padding-right: 0; }
+    .cb-section.tinted .cb-section-inner { padding: 30px 0; }
+
+    /* ---- Nuestra historia (inicio) ---- */
+    .cb-story { align-items: stretch; gap: 28px; }
+    .cb-story-img { flex: none; width: 100%; height: 240px; }
+    .cb-story-img:has(img) { height: auto; background: none; }
+    .cb-story-img img { width: 100%; height: auto !important; object-fit: contain !important; display: block; }
+    .cb-story-copy { flex: none; }
+
+    /* ---- Newsletter ---- */
+    .cb-newsletter {
+        margin: 0 20px 50px 20px;
+        max-width: none;
+        padding: 32px 24px;
+        flex-direction: column;
+        align-items: stretch;
+        gap: 24px;
+    }
+    .cb-newsletter-form { width: 100%; flex-shrink: 1; }
+    .cb-newsletter-form input { width: auto; flex: 1; min-width: 0; box-sizing: border-box; }
+
+    /* ---- Pie de página ---- */
+    .cb-footer { padding: 40px 24px 24px 24px; }
+}
+
+@media (max-width: 576px) {
+    .cb-newsletter-form { flex-direction: column; }
+    .cb-newsletter-form input,
+    .cb-newsletter-form .btn { width: 100%; box-sizing: border-box; }
+}
